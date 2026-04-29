@@ -206,11 +206,10 @@
     <script>
         // ================= CONFIGURATION =================
         // Remplace par ton Bin ID et ta clé secrète JSONBin.io
-        const JSONBIN_BIN_ID = 'REMPLACE_PAR_TON_BIN_ID'; // ex: "6123456789abcdef01234567"
-        const JSONBIN_API_KEY = 'REMPLACE_PAR_TA_CLE_SECRETE'; // ex: "$2b$10$..."
+        const JSONBIN_BIN_ID = '69f23a6d36566621a8078aea'; // ex: "6123456789abcdef01234567"
+        const JSONBIN_API_KEY = '$2a$10$/hRZ1ZxeRptOuPuX8dmJG.TF0WsN6wIv1JSI6pz9kTZgQzp4bAuYG'; // ex: "$2b$10$..."
         // =================================================
 
-        // URL de l'API JSONBin (version 3)
         const API_URL = `https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`;
 
         const translations = {
@@ -512,7 +511,7 @@
             return Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
         }
 
-        // Fonction pour récupérer les données depuis JSONBin.io
+        // Chargement avec nettoyage de l'élément d'amorçage
         async function loadData() {
             const t = translations[currentLang];
             statusDiv.textContent = t.statusLoading;
@@ -528,9 +527,10 @@
                     throw new Error(t.errorServer + ' (' + response.status + ')');
                 }
                 const result = await response.json();
-                // La structure renvoyée est { record: ... }
-                const data = result.record;
+                let data = result.record;
                 if (Array.isArray(data)) {
+                    // Supprimer l'élément d'initialisation s'il existe encore
+                    data = data.filter(item => !item._init);
                     entries = data;
                     localStorage.setItem('noahCache', JSON.stringify(entries));
                     statusDiv.textContent = t.statusCloud;
@@ -555,7 +555,7 @@
             renderEntries();
         }
 
-        // Fonction pour sauvegarder les données sur JSONBin.io
+        // Sauvegarde (le tableau ne contient jamais l'élément d'init)
         async function saveData() {
             const t = translations[currentLang];
             localStorage.setItem('noahCache', JSON.stringify(entries));
