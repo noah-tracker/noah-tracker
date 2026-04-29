@@ -205,12 +205,12 @@
 
     <script>
         // ================= CONFIGURATION =================
-        // Remplace par ton Bin ID et ta clé secrète JSONBin.io
-        const JSONBIN_BIN_ID = '69f23a6d36566621a8078aea'; // ex: "6123456789abcdef01234567"
-        const JSONBIN_API_KEY = '$2a$10$/hRZ1ZxeRptOuPuX8dmJG.TF0WsN6wIv1JSI6pz9kTZgQzp4bAuYG'; // ex: "$2b$10$..."
+        const FIREBASE_URL = 'https://noah-tracker-c27f4-default-rtdb.europe-west1.firebasedatabase.app/entries.json';
+        const FIREBASE_SECRET = '4X64T2m3GOO08BwgvnBgHesQ0gXCEcv34HQ5ufwX';
         // =================================================
 
-        const API_URL = `https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`;
+        // Le secret est transmis comme paramètre "auth" dans l'URL
+        const AUTH_PARAM = `auth=${FIREBASE_SECRET}`;
 
         const translations = {
             fr: {
@@ -221,13 +221,10 @@
                 statusEmpty: '⚠️ Aucune donnée, démarrage à vide',
                 statusSavedCloud: '✅ Synchronisé avec le cloud',
                 statusSavedLocal: '⚠️ Données enregistrées localement (connexion indisponible)',
-                errorNetwork: '❌ Erreur réseau : impossible de joindre le serveur. Vérifie ta connexion Internet.',
-                errorAuth: '❌ Clé API invalide (403). Vérifie la clé dans le code.',
-                errorNotFound: '❌ Bin introuvable (404). Vérifie l\'ID du bin.',
-                errorServer: '❌ Erreur serveur JSONBin.',
+                errorNetwork: '❌ Erreur réseau : impossible de joindre le serveur.',
+                errorAuth: '❌ Accès refusé (authentification). Vérifie le secret Firebase.',
+                errorServer: '❌ Erreur serveur Firebase.',
                 errorFormat: '❌ Les données ne sont pas un tableau valide.',
-                errorSaveAuth: '❌ Sauvegarde impossible : clé invalide (403).',
-                errorSaveNotFound: '❌ Sauvegarde impossible : bin introuvable (404).',
                 eventTypeLabel: "Type d'événement *",
                 choose: '-- Choisis --',
                 biberon: '🍼 Biberon',
@@ -289,13 +286,10 @@
                 statusEmpty: '⚠️ No data, starting empty',
                 statusSavedCloud: '✅ Synced with cloud',
                 statusSavedLocal: '⚠️ Data saved locally (no connection)',
-                errorNetwork: '❌ Network error: Cannot reach server. Check your internet connection.',
-                errorAuth: '❌ Invalid API key (403). Check the key in source code.',
-                errorNotFound: '❌ Bin not found (404). Check the Bin ID.',
-                errorServer: '❌ JSONBin server error.',
+                errorNetwork: '❌ Network error: Cannot reach server.',
+                errorAuth: '❌ Access denied (auth). Check Firebase secret.',
+                errorServer: '❌ Firebase server error.',
                 errorFormat: '❌ Data is not a valid array.',
-                errorSaveAuth: '❌ Save failed: invalid key (403).',
-                errorSaveNotFound: '❌ Save failed: bin not found (404).',
                 eventTypeLabel: 'Event type *',
                 choose: '-- Choose --',
                 biberon: '🍼 Bottle',
@@ -511,34 +505,26 @@
             return Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
         }
 
-        // Chargement avec nettoyage de l'élément d'amorçage
         async function loadData() {
             const t = translations[currentLang];
             statusDiv.textContent = t.statusLoading;
             try {
-                const response = await fetch(`${API_URL}/latest`, {
-                    headers: {
-                        'X-Master-Key': JSONBIN_API_KEY
-                    }
-                });
+                const response = await fetch(`${FIREBASE_URL}?${AUTH_PARAM}`);
                 if (!response.ok) {
-                    if (response.status === 403) throw new Error(t.errorAuth);
-                    if (response.status === 404) throw new Error(t.errorNotFound);
+                    if (response.status === 401 || response.status === 403) throw new Error(t.errorAuth);
                     throw new Error(t.errorServer + ' (' + response.status + ')');
                 }
-                const result = await response.json();
-                let data = result.record;
-                if (Array.isArray(data)) {
-                    // Supprimer l'élément d'initialisation s'il existe encore
-                    data = data.filter(item => !item._init);
+                const data = await response.json();
+                // Firebase peut renvoyer null si le chemin n'existe pas encore
+                if (data && Array.isArray(data)) {
                     entries = data;
-                    localStorage.setItem('noahCache', JSON.stringify(entries));
-                    statusDiv.textContent = t.statusCloud;
                 } else {
-                    throw new Error(t.errorFormat);
+                    entries = [];
                 }
+                localStorage.setItem('noahCache', JSON.stringify(entries));
+                statusDiv.textContent = t.statusCloud;
             } catch (e) {
-                console.warn('JSONBin load error', e);
+                console.warn('Firebase load error', e);
                 let message = e.message;
                 if (e instanceof TypeError) {
                     message = t.errorNetwork;
@@ -555,28 +541,25 @@
             renderEntries();
         }
 
-        // Sauvegarde (le tableau ne contient jamais l'élément d'init)
         async function saveData() {
             const t = translations[currentLang];
             localStorage.setItem('noahCache', JSON.stringify(entries));
             try {
-                const response = await fetch(API_URL, {
+                const response = await fetch(`${FIREBASE_URL}?${AUTH_PARAM}`, {
                     method: 'PUT',
                     headers: {
-                        'Content-Type': 'application/json',
-                        'X-Master-Key': JSONBIN_API_KEY
+                        'Content-Type': 'application/json'
                     },
                     body: JSON.stringify(entries)
                 });
                 if (response.ok) {
                     statusDiv.textContent = t.statusSavedCloud;
                 } else {
-                    if (response.status === 403) throw new Error(t.errorSaveAuth);
-                    if (response.status === 404) throw new Error(t.errorSaveNotFound);
+                    if (response.status === 401 || response.status === 403) throw new Error(t.errorAuth);
                     throw new Error(t.errorServer + ' (' + response.status + ')');
                 }
             } catch (e) {
-                console.error('JSONBin save error', e);
+                console.error('Firebase save error', e);
                 let message = e.message;
                 if (e instanceof TypeError) {
                     message = t.errorNetwork;
