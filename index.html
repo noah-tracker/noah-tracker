@@ -205,10 +205,13 @@
 
     <script>
         // ================= CONFIGURATION =================
-        const WEBDAV_URL = 'https://corsproxy.io/?' + encodeURIComponent('https://fie.nl.tab.digital/remote.php/dav/files/noahtracker/noah-data.json');
-        const USERNAME = 'noahtrackerapp@atomicmail.io';
-        const PASSWORD = 'Noah020825!';
+        // Remplace par ton Bin ID et ta clé secrète JSONBin.io
+        const JSONBIN_BIN_ID = 'REMPLACE_PAR_TON_BIN_ID'; // ex: "6123456789abcdef01234567"
+        const JSONBIN_API_KEY = 'REMPLACE_PAR_TA_CLE_SECRETE'; // ex: "$2b$10$..."
         // =================================================
+
+        // URL de l'API JSONBin (version 3)
+        const API_URL = `https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`;
 
         const translations = {
             fr: {
@@ -219,15 +222,13 @@
                 statusEmpty: '⚠️ Aucune donnée, démarrage à vide',
                 statusSavedCloud: '✅ Synchronisé avec le cloud',
                 statusSavedLocal: '⚠️ Données enregistrées localement (connexion indisponible)',
-                errorNetwork: '❌ Erreur réseau : impossible de joindre le serveur WebDAV. Vérifie ta connexion Internet.',
-                errorAuth: '❌ Échec d\'authentification (401). Vérifie l\'identifiant et le mot de passe dans le code source.',
-                errorForbidden: '❌ Accès interdit (403). L\'utilisateur n\'a peut-être pas les droits sur ce fichier.',
-                errorNotFound: '❌ Fichier introuvable (404). Vérifie l\'URL WebDAV. Le fichier noah-data.json existe-t-il ?',
-                errorServer: '❌ Erreur serveur WebDAV (statut inattendu).',
-                errorFormat: '❌ Le fichier JSON n\'est pas un tableau valide.',
-                errorSaveAuth: '❌ Sauvegarde impossible : identifiants incorrects (401). Les données restent en local.',
-                errorSaveForbidden: '❌ Sauvegarde impossible : droits insuffisants (403).',
-                errorSaveNotFound: '❌ Sauvegarde impossible : le dossier ou le fichier n\'existe pas (404).',
+                errorNetwork: '❌ Erreur réseau : impossible de joindre le serveur. Vérifie ta connexion Internet.',
+                errorAuth: '❌ Clé API invalide (403). Vérifie la clé dans le code.',
+                errorNotFound: '❌ Bin introuvable (404). Vérifie l\'ID du bin.',
+                errorServer: '❌ Erreur serveur JSONBin.',
+                errorFormat: '❌ Les données ne sont pas un tableau valide.',
+                errorSaveAuth: '❌ Sauvegarde impossible : clé invalide (403).',
+                errorSaveNotFound: '❌ Sauvegarde impossible : bin introuvable (404).',
                 eventTypeLabel: "Type d'événement *",
                 choose: '-- Choisis --',
                 biberon: '🍼 Biberon',
@@ -289,15 +290,13 @@
                 statusEmpty: '⚠️ No data, starting empty',
                 statusSavedCloud: '✅ Synced with cloud',
                 statusSavedLocal: '⚠️ Data saved locally (no connection)',
-                errorNetwork: '❌ Network error: Cannot reach WebDAV server. Check your internet connection.',
-                errorAuth: '❌ Authentication failed (401). Check username/password in source code.',
-                errorForbidden: '❌ Forbidden (403). The user may not have permission to this file.',
-                errorNotFound: '❌ File not found (404). Check the WebDAV URL. Does noah-data.json exist?',
-                errorServer: '❌ Unexpected WebDAV server error.',
-                errorFormat: '❌ The JSON file is not a valid array.',
-                errorSaveAuth: '❌ Save failed: incorrect credentials (401). Data remains local.',
-                errorSaveForbidden: '❌ Save failed: insufficient permissions (403).',
-                errorSaveNotFound: '❌ Save failed: folder or file does not exist (404).',
+                errorNetwork: '❌ Network error: Cannot reach server. Check your internet connection.',
+                errorAuth: '❌ Invalid API key (403). Check the key in source code.',
+                errorNotFound: '❌ Bin not found (404). Check the Bin ID.',
+                errorServer: '❌ JSONBin server error.',
+                errorFormat: '❌ Data is not a valid array.',
+                errorSaveAuth: '❌ Save failed: invalid key (403).',
+                errorSaveNotFound: '❌ Save failed: bin not found (404).',
                 eventTypeLabel: 'Event type *',
                 choose: '-- Choose --',
                 biberon: '🍼 Bottle',
@@ -513,28 +512,24 @@
             return Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
         }
 
-        function getFetchErrorMessage(status, t) {
-            if (status === 401) return t.errorAuth;
-            if (status === 403) return t.errorForbidden;
-            if (status === 404) return t.errorNotFound;
-            if (status >= 500) return t.errorServer + ' (' + status + ')';
-            return t.errorServer + ' (' + status + ')';
-        }
-
+        // Fonction pour récupérer les données depuis JSONBin.io
         async function loadData() {
             const t = translations[currentLang];
             statusDiv.textContent = t.statusLoading;
             try {
-                const response = await fetch(WEBDAV_URL, {
+                const response = await fetch(`${API_URL}/latest`, {
                     headers: {
-                        'Authorization': 'Basic ' + btoa(USERNAME + ':' + PASSWORD)
+                        'X-Master-Key': JSONBIN_API_KEY
                     }
                 });
                 if (!response.ok) {
-                    const errorMsg = getFetchErrorMessage(response.status, t);
-                    throw new Error(errorMsg);
+                    if (response.status === 403) throw new Error(t.errorAuth);
+                    if (response.status === 404) throw new Error(t.errorNotFound);
+                    throw new Error(t.errorServer + ' (' + response.status + ')');
                 }
-                const data = await response.json();
+                const result = await response.json();
+                // La structure renvoyée est { record: ... }
+                const data = result.record;
                 if (Array.isArray(data)) {
                     entries = data;
                     localStorage.setItem('noahCache', JSON.stringify(entries));
@@ -543,7 +538,7 @@
                     throw new Error(t.errorFormat);
                 }
             } catch (e) {
-                console.warn('WebDAV load error', e);
+                console.warn('JSONBin load error', e);
                 let message = e.message;
                 if (e instanceof TypeError) {
                     message = t.errorNetwork;
@@ -560,30 +555,28 @@
             renderEntries();
         }
 
+        // Fonction pour sauvegarder les données sur JSONBin.io
         async function saveData() {
             const t = translations[currentLang];
             localStorage.setItem('noahCache', JSON.stringify(entries));
             try {
-                const response = await fetch(WEBDAV_URL, {
+                const response = await fetch(API_URL, {
                     method: 'PUT',
                     headers: {
-                        'Authorization': 'Basic ' + btoa(USERNAME + ':' + PASSWORD),
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'X-Master-Key': JSONBIN_API_KEY
                     },
                     body: JSON.stringify(entries)
                 });
                 if (response.ok) {
                     statusDiv.textContent = t.statusSavedCloud;
                 } else {
-                    let errorMsg;
-                    if (response.status === 401) errorMsg = t.errorSaveAuth;
-                    else if (response.status === 403) errorMsg = t.errorSaveForbidden;
-                    else if (response.status === 404) errorMsg = t.errorSaveNotFound;
-                    else errorMsg = t.errorServer + ' (' + response.status + ')';
-                    throw new Error(errorMsg);
+                    if (response.status === 403) throw new Error(t.errorSaveAuth);
+                    if (response.status === 404) throw new Error(t.errorSaveNotFound);
+                    throw new Error(t.errorServer + ' (' + response.status + ')');
                 }
             } catch (e) {
-                console.error('WebDAV save error', e);
+                console.error('JSONBin save error', e);
                 let message = e.message;
                 if (e instanceof TypeError) {
                     message = t.errorNetwork;
