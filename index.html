@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Noah Tracker</title>
+    <link rel="manifest" href="manifest.json">
+    <style>
+        :root {
+            --primary: #3498db;
+            --bg: #f0f8ff;
+            --card-bg: #fff;
+            --text: #2c3e50;
+            --danger: #e74c3c;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            padding: 1rem;
+            max-width: 600px;
+            margin: auto;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+        h1 {
+            color: var(--primary);
+            margin: 0;
+        }
+        .lang-toggle {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .subtitle {
+            text-align: center;
+            font-size: 0.9rem;
+            color: #7f8c8d;
+            margin-bottom: 0.8rem;
+        }
+        .status {
+            text-align: center;
+            font-size: 0.8rem;
+            color: #7f8c8d;
+            margin-bottom: 1rem;
+            white-space: pre-line;
+            line-height: 1.3;
+        }
+        form {
+            background: var(--card-bg);
+            padding: 1.2rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 1.5rem;
+        }
+        label {
+            display: block;
+            font-weight: bold;
+            margin-top: 0.8rem;
+            margin-bottom: 0.2rem;
+        }
+        input[type="datetime-local"],
+        input[type="text"],
+        input[type="number"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 0.6rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+        button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.7rem 1.2rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 1rem;
+            width: 100%;
+        }
+        button.delete-btn {
+            background: var(--danger);
+        }
+        .entry-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 0.8rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            position: relative;
+        }
+        .entry-card .actions {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            display: flex;
+            gap: 0.3rem;
+        }
+        .entry-card .actions button {
+            background: transparent;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            width: auto;
+            padding: 0.2rem 0.4rem;
+        }
+        .badge {
+            display: inline-block;
+            padding: 0.2rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            color: white;
+            margin-right: 0.4rem;
+        }
+        .badge-biberon { background: #1abc9c; }
+        .badge-repas { background: #27ae60; }
+        .badge-pipi { background: #3498db; }
+        .badge-caca { background: #8e44ad; }
+        .badge-bain { background: #2980b9; }
+        .badge-medicament { background: #e67e22; }
+        .badge-autre { background: #95a5a6; }
+        hr { margin: 0.8rem 0; border-color: #eee; }
+
+        .extra-fields {
+            display: none;
+        }
+        .extra-fields.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🧒 Noah Tracker</h1>
+        <button class="lang-toggle" id="langToggle">EN</button>
+    </div>
+    <div class="subtitle" id="subtitle"></div>
+    <div class="status" id="status"></div>
+
+    <form id="mainForm">
+        <input type="hidden" id="entryId">
+        
+        <label for="eventType" id="lblEventType"></label>
+        <select id="eventType" required></select>
+
+        <label for="eventDate" id="lblEventDate"></label>
+        <input type="datetime-local" id="eventDate" required>
+
+        <!-- Biberon -->
+        <div id="fieldsBiberon" class="extra-fields">
+            <label for="biberonQuantite" id="lblBibQty"></label>
+            <input type="text" id="biberonQuantite" placeholder="180" inputmode="numeric">
+            <label for="biberonType" id="lblBibType"></label>
+            <input type="text" id="biberonType" placeholder="">
+        </div>
+
+        <!-- Repas solide -->
+        <div id="fieldsRepas" class="extra-fields">
+            <label for="repasDescription" id="lblRepasDesc"></label>
+            <input type="text" id="repasDescription" placeholder="">
+            <label for="repasQuantite" id="lblRepasQty"></label>
+            <input type="text" id="repasQuantite" placeholder="">
+        </div>
+
+        <!-- Caca (a consistance) -->
+        <div id="fieldsCaca" class="extra-fields">
+            <label id="lblConsistanceCaca"></label>
+            <select id="cacaConsistance"></select>
+        </div>
+
+        <!-- Médicament -->
+        <div id="fieldsMedicament" class="extra-fields">
+            <label for="medicamentNom" id="lblMedNom"></label>
+            <input type="text" id="medicamentNom" placeholder="">
+            <label for="medicamentDose" id="lblMedDose"></label>
+            <input type="text" id="medicamentDose" placeholder="">
+        </div>
+
+        <!-- Notes communes -->
+        <label for="notes" id="lblNotes"></label>
+        <textarea id="notes" rows="2" placeholder=""></textarea>
+
+        <button type="submit" id="saveButton">💾 Enregistrer</button>
+        <button type="button" id="cancelButton" class="delete-btn" style="display:none;">Annuler modification</button>
+    </form>
+
+    <hr>
+    <h2 id="historyTitle"></h2>
+    <div id="entryList"></div>
+
+    <script>
+        // ================= CONFIGURATION =================
+        const WEBDAV_URL = 'https://fie.nl.tab.digital/remote.php/dav/files/noahtracker/noah-data.json';
+        const USERNAME = 'noahtrackerapp@atomicmail.io';
+        const PASSWORD = 'Noah020825!';
+        // =================================================
+
+        const translations = {
+            fr: {
+                subtitle: 'Suivi quotidien de Noah',
+                statusLoading: 'Chargement en cours...',
+                statusCloud: '✅ Données chargées depuis le cloud',
+                statusOffline: '⚠️ Mode hors ligne (données locales)',
+                statusEmpty: '⚠️ Aucune donnée, démarrage à vide',
+                statusSavedCloud: '✅ Synchronisé avec le cloud',
+                statusSavedLocal: '⚠️ Données enregistrées localement (connexion indisponible)',
+                errorNetwork: '❌ Erreur réseau : impossible de joindre le serveur WebDAV. Vérifie ta connexion Internet.',
+                errorAuth: '❌ Échec d\'authentification (401). Vérifie l\'identifiant et le mot de passe dans le code source.',
+                errorForbidden: '❌ Accès interdit (403). L\'utilisateur n\'a peut-être pas les droits sur ce fichier.',
+                errorNotFound: '❌ Fichier introuvable (404). Vérifie l\'URL WebDAV. Le fichier noah-data.json existe-t-il ?',
+                errorServer: '❌ Erreur serveur WebDAV (statut inattendu).',
+                errorFormat: '❌ Le fichier JSON n\'est pas un tableau valide.',
+                errorSaveAuth: '❌ Sauvegarde impossible : identifiants incorrects (401). Les données restent en local.',
+                errorSaveForbidden: '❌ Sauvegarde impossible : droits insuffisants (403).',
+                errorSaveNotFound: '❌ Sauvegarde impossible : le dossier ou le fichier n\'existe pas (404).',
+                eventTypeLabel: "Type d'événement *",
+                choose: '-- Choisis --',
+                biberon: '🍼 Biberon',
+                repas: '🍽️ Repas solide',
+                pipi: '💧 Pipi',
+                caca: '💩 Caca',
+                bain: '🛁 Bain',
+                medicament: '💊 Médicament',
+                autre: '📝 Autre',
+                dateLabel: 'Date et heure *',
+                bibQtyLabel: 'Quantité (ml) *',
+                bibQtyPlaceholder: 'Ex : 180',
+                bibTypeLabel: 'Type de lait / remarque',
+                bibTypePlaceholder: 'Ex : lait infantile, lait maternel...',
+                repasDescLabel: 'Aliment(s) *',
+                repasDescPlaceholder: 'Ex : purée de carottes, compote...',
+                repasQtyLabel: 'Quantité',
+                repasQtyPlaceholder: 'Ex : 100g, un petit pot...',
+                consistanceCacaLabel: 'Consistance (optionnelle)',
+                consistanceChoose: '-- Indique si besoin --',
+                liquide: 'Liquide',
+                molles: 'Molles',
+                solides: 'Solides',
+                dures: 'Dures',
+                medNomLabel: 'Nom du médicament *',
+                medNomPlaceholder: 'Ex : Doliprane, Advil...',
+                medDoseLabel: 'Dose / quantité',
+                medDosePlaceholder: 'Ex : 2.5 ml, un suppo...',
+                notesLabel: 'Notes (commentaire libre)',
+                notesPlaceholder: 'Tout ce que tu veux ajouter...',
+                saveBtn: '💾 Enregistrer',
+                updateBtn: '✅ Mettre à jour',
+                cancelBtn: 'Annuler la modification',
+                historyTitle: '📋 Historique',
+                noEntries: 'Aucun événement pour le moment.',
+                editTitle: 'Modifier',
+                deleteTitle: 'Supprimer',
+                deleteConfirm: 'Supprimer cet événement ?',
+                badgeBiberon: '🍼 Biberon',
+                badgeRepas: '🍽️ Repas solide',
+                badgePipi: '💧 Pipi',
+                badgeCaca: '💩 Caca',
+                badgeBain: '🛁 Bain',
+                badgeMedicament: '💊 Médicament',
+                badgeAutre: '📝 Autre',
+                detailsBiberon: (qty, desc) => `<strong>${qty || '?'} ml</strong>${desc ? ' – ' + desc : ''}`,
+                detailsRepas: (desc, qty) => `<strong>${desc || 'Repas'}</strong>${qty ? ' – ' + qty : ''}`,
+                detailsPipi: 'Pipi',
+                detailsCaca: (consistance) => consistance ? `Caca (${consistance})` : 'Caca',
+                detailsBain: 'Bain',
+                detailsMedicament: (nom, dose) => `<strong>${nom || 'Médicament'}</strong>${dose ? ' – ' + dose : ''}`,
+                detailsAutre: 'Événement divers'
+            },
+            en: {
+                subtitle: "Noah's daily tracking",
+                statusLoading: 'Loading...',
+                statusCloud: '✅ Data loaded from cloud',
+                statusOffline: '⚠️ Offline mode (local data)',
+                statusEmpty: '⚠️ No data, starting empty',
+                statusSavedCloud: '✅ Synced with cloud',
+                statusSavedLocal: '⚠️ Data saved locally (no connection)',
+                errorNetwork: '❌ Network error: Cannot reach WebDAV server. Check your internet connection.',
+                errorAuth: '❌ Authentication failed (401). Check username/password in source code.',
+                errorForbidden: '❌ Forbidden (403). The user may not have permission to this file.',
+                errorNotFound: '❌ File not found (404). Check the WebDAV URL. Does noah-data.json exist?',
+                errorServer: '❌ Unexpected WebDAV server error.',
+                errorFormat: '❌ The JSON file is not a valid array.',
+                errorSaveAuth: '❌ Save failed: incorrect credentials (401). Data remains local.',
+                errorSaveForbidden: '❌ Save failed: insufficient permissions (403).',
+                errorSaveNotFound: '❌ Save failed: folder or file does not exist (404).',
+                eventTypeLabel: 'Event type *',
+                choose: '-- Choose --',
+                biberon: '🍼 Bottle',
+                repas: '🍽️ Solid meal',
+                pipi: '💧 Pee',
+                caca: '💩 Poop',
+                bain: '🛁 Bath',
+                medicament: '💊 Medication',
+                autre: '📝 Other',
+                dateLabel: 'Date and time *',
+                bibQtyLabel: 'Quantity (ml) *',
+                bibQtyPlaceholder: 'E.g. 180',
+                bibTypeLabel: 'Milk type / note',
+                bibTypePlaceholder: 'E.g. formula, breast milk...',
+                repasDescLabel: 'Food(s) *',
+                repasDescPlaceholder: 'E.g. carrot puree, apple sauce...',
+                repasQtyLabel: 'Quantity',
+                repasQtyPlaceholder: 'E.g. 100g, one small jar...',
+                consistanceCacaLabel: 'Consistency (optional)',
+                consistanceChoose: '-- Optional --',
+                liquide: 'Liquid',
+                molles: 'Soft',
+                solides: 'Solid',
+                dures: 'Hard',
+                medNomLabel: 'Medication name *',
+                medNomPlaceholder: 'E.g. Tylenol, Advil...',
+                medDoseLabel: 'Dose / amount',
+                medDosePlaceholder: 'E.g. 2.5 ml, one suppository...',
+                notesLabel: 'Notes (free comment)',
+                notesPlaceholder: 'Anything you want to add...',
+                saveBtn: '💾 Save',
+                updateBtn: '✅ Update',
+                cancelBtn: 'Cancel editing',
+                historyTitle: '📋 History',
+                noEntries: 'No events yet.',
+                editTitle: 'Edit',
+                deleteTitle: 'Delete',
+                deleteConfirm: 'Delete this event?',
+                badgeBiberon: '🍼 Bottle',
+                badgeRepas: '🍽️ Solid meal',
+                badgePipi: '💧 Pee',
+                badgeCaca: '💩 Poop',
+                badgeBain: '🛁 Bath',
+                badgeMedicament: '💊 Medication',
+                badgeAutre: '📝 Other',
+                detailsBiberon: (qty, desc) => `<strong>${qty || '?'} ml</strong>${desc ? ' – ' + desc : ''}`,
+                detailsRepas: (desc, qty) => `<strong>${desc || 'Meal'}</strong>${qty ? ' – ' + qty : ''}`,
+                detailsPipi: 'Pee',
+                detailsCaca: (consistance) => consistance ? `Poop (${consistance})` : 'Poop',
+                detailsBain: 'Bath',
+                detailsMedicament: (nom, dose) => `<strong>${nom || 'Medication'}</strong>${dose ? ' – ' + dose : ''}`,
+                detailsAutre: 'Other event'
+            }
+        };
+
+        let currentLang = localStorage.getItem('noahLang') || 'fr';
+        let entries = [];
+        let editingId = null;
+
+        // DOM elements
+        const langToggle = document.getElementById('langToggle');
+        const subtitleEl = document.getElementById('subtitle');
+        const statusDiv = document.getElementById('status');
+        const form = document.getElementById('mainForm');
+        const entryIdInput = document.getElementById('entryId');
+        const eventTypeSelect = document.getElementById('eventType');
+        const eventDateInput = document.getElementById('eventDate');
+        const notesInput = document.getElementById('notes');
+        const saveButton = document.getElementById('saveButton');
+        const cancelButton = document.getElementById('cancelButton');
+        const entryListDiv = document.getElementById('entryList');
+        const historyTitleEl = document.getElementById('historyTitle');
+
+        // Extra fields
+        const fieldsBiberon = document.getElementById('fieldsBiberon');
+        const fieldsRepas = document.getElementById('fieldsRepas');
+        const fieldsCaca = document.getElementById('fieldsCaca');
+        const fieldsMedicament = document.getElementById('fieldsMedicament');
+        const biberonQuantite = document.getElementById('biberonQuantite');
+        const biberonType = document.getElementById('biberonType');
+        const repasDescription = document.getElementById('repasDescription');
+        const repasQuantite = document.getElementById('repasQuantite');
+        const cacaConsistance = document.getElementById('cacaConsistance');
+        const medicamentNom = document.getElementById('medicamentNom');
+        const medicamentDose = document.getElementById('medicamentDose');
+
+        function applyLanguage(lang) {
+            const t = translations[lang];
+            document.documentElement.lang = lang;
+            subtitleEl.textContent = t.subtitle;
+            langToggle.textContent = lang === 'fr' ? 'EN' : 'FR';
+            document.getElementById('lblEventType').textContent = t.eventTypeLabel;
+            eventTypeSelect.innerHTML = `
+                <option value="">${t.choose}</option>
+                <option value="biberon">${t.biberon}</option>
+                <option value="repas">${t.repas}</option>
+                <option value="pipi">${t.pipi}</option>
+                <option value="caca">${t.caca}</option>
+                <option value="bain">${t.bain}</option>
+                <option value="medicament">${t.medicament}</option>
+                <option value="autre">${t.autre}</option>
+            `;
+            document.getElementById('lblEventDate').textContent = t.dateLabel;
+            document.getElementById('lblBibQty').textContent = t.bibQtyLabel;
+            biberonQuantite.placeholder = t.bibQtyPlaceholder;
+            document.getElementById('lblBibType').textContent = t.bibTypeLabel;
+            biberonType.placeholder = t.bibTypePlaceholder;
+            document.getElementById('lblRepasDesc').textContent = t.repasDescLabel;
+            repasDescription.placeholder = t.repasDescPlaceholder;
+            document.getElementById('lblRepasQty').textContent = t.repasQtyLabel;
+            repasQuantite.placeholder = t.repasQtyPlaceholder;
+            document.getElementById('lblConsistanceCaca').textContent = t.consistanceCacaLabel;
+            cacaConsistance.innerHTML = `
+                <option value="">${t.consistanceChoose}</option>
+                <option value="liquide">${t.liquide}</option>
+                <option value="molles">${t.molles}</option>
+                <option value="solides">${t.solides}</option>
+                <option value="dures">${t.dures}</option>
+            `;
+            document.getElementById('lblMedNom').textContent = t.medNomLabel;
+            medicamentNom.placeholder = t.medNomPlaceholder;
+            document.getElementById('lblMedDose').textContent = t.medDoseLabel;
+            medicamentDose.placeholder = t.medDosePlaceholder;
+            document.getElementById('lblNotes').textContent = t.notesLabel;
+            notesInput.placeholder = t.notesPlaceholder;
+            saveButton.textContent = t.saveBtn;
+            cancelButton.textContent = t.cancelBtn;
+            historyTitleEl.textContent = t.historyTitle;
+
+            resetForm();
+            renderEntries();
+            if (entries.length > 0) {
+                statusDiv.textContent = t.statusCloud;
+            } else {
+                statusDiv.textContent = t.statusEmpty;
+            }
+        }
+
+        langToggle.addEventListener('click', () => {
+            currentLang = currentLang === 'fr' ? 'en' : 'fr';
+            localStorage.setItem('noahLang', currentLang);
+            applyLanguage(currentLang);
+        });
+
+        function updateExtraFields() {
+            const type = eventTypeSelect.value;
+            fieldsBiberon.classList.remove('active');
+            fieldsRepas.classList.remove('active');
+            fieldsCaca.classList.remove('active');
+            fieldsMedicament.classList.remove('active');
+            biberonQuantite.required = false;
+            repasDescription.required = false;
+            medicamentNom.required = false;
+
+            if (type === 'biberon') {
+                fieldsBiberon.classList.add('active');
+                biberonQuantite.required = true;
+            } else if (type === 'repas') {
+                fieldsRepas.classList.add('active');
+                repasDescription.required = true;
+            } else if (type === 'caca') {
+                fieldsCaca.classList.add('active');
+            } else if (type === 'medicament') {
+                fieldsMedicament.classList.add('active');
+                medicamentNom.required = true;
+            }
+        }
+        eventTypeSelect.addEventListener('change', updateExtraFields);
+
+        function resetForm() {
+            entryIdInput.value = '';
+            eventTypeSelect.value = '';
+            eventDateInput.value = '';
+            notesInput.value = '';
+            biberonQuantite.value = '';
+            biberonType.value = '';
+            repasDescription.value = '';
+            repasQuantite.value = '';
+            cacaConsistance.value = '';
+            medicamentNom.value = '';
+            medicamentDose.value = '';
+            updateExtraFields();
+            editingId = null;
+            saveButton.textContent = translations[currentLang].saveBtn;
+            cancelButton.style.display = 'none';
+        }
+
+        function editEntry(entry) {
+            entryIdInput.value = entry.id;
+            eventTypeSelect.value = entry.type;
+            eventDateInput.value = entry.date || '';
+            notesInput.value = entry.notes || '';
+            if (entry.type === 'biberon') {
+                biberonQuantite.value = entry.quantite || '';
+                biberonType.value = entry.description || '';
+            } else if (entry.type === 'repas') {
+                repasDescription.value = entry.description || '';
+                repasQuantite.value = entry.quantite || '';
+            } else if (entry.type === 'caca') {
+                cacaConsistance.value = entry.consistance || '';
+            } else if (entry.type === 'medicament') {
+                medicamentNom.value = entry.nom || '';
+                medicamentDose.value = entry.dose || '';
+            }
+            updateExtraFields();
+            editingId = entry.id;
+            saveButton.textContent = translations[currentLang].updateBtn;
+            cancelButton.style.display = 'inline-block';
+            window.scrollTo({ top: form.offsetTop - 10, behavior: 'smooth' });
+        }
+
+        function generateId() {
+            return Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+        }
+
+        function getFetchErrorMessage(status, t) {
+            if (status === 401) return t.errorAuth;
+            if (status === 403) return t.errorForbidden;
+            if (status === 404) return t.errorNotFound;
+            if (status >= 500) return t.errorServer + ' (' + status + ')';
+            return t.errorServer + ' (' + status + ')';
+        }
+
+        async function loadData() {
+            const t = translations[currentLang];
+            statusDiv.textContent = t.statusLoading;
+            try {
+                const response = await fetch(WEBDAV_URL, {
+                    headers: {
+                        'Authorization': 'Basic ' + btoa(USERNAME + ':' + PASSWORD)
+                    }
+                });
+                if (!response.ok) {
+                    const errorMsg = getFetchErrorMessage(response.status, t);
+                    throw new Error(errorMsg);
+                }
+                const data = await response.json();
+                if (Array.isArray(data)) {
+                    entries = data;
+                    localStorage.setItem('noahCache', JSON.stringify(entries));
+                    statusDiv.textContent = t.statusCloud;
+                } else {
+                    throw new Error(t.errorFormat);
+                }
+            } catch (e) {
+                console.warn('WebDAV load error', e);
+                let message = e.message;
+                if (e instanceof TypeError) {
+                    message = t.errorNetwork;
+                }
+                statusDiv.textContent = message;
+                const cached = localStorage.getItem('noahCache');
+                if (cached) {
+                    entries = JSON.parse(cached);
+                    statusDiv.textContent += '\n' + t.statusOffline;
+                } else {
+                    entries = [];
+                }
+            }
+            renderEntries();
+        }
+
+        async function saveData() {
+            const t = translations[currentLang];
+            localStorage.setItem('noahCache', JSON.stringify(entries));
+            try {
+                const response = await fetch(WEBDAV_URL, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': 'Basic ' + btoa(USERNAME + ':' + PASSWORD),
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(entries)
+                });
+                if (response.ok) {
+                    statusDiv.textContent = t.statusSavedCloud;
+                } else {
+                    let errorMsg;
+                    if (response.status === 401) errorMsg = t.errorSaveAuth;
+                    else if (response.status === 403) errorMsg = t.errorSaveForbidden;
+                    else if (response.status === 404) errorMsg = t.errorSaveNotFound;
+                    else errorMsg = t.errorServer + ' (' + response.status + ')';
+                    throw new Error(errorMsg);
+                }
+            } catch (e) {
+                console.error('WebDAV save error', e);
+                let message = e.message;
+                if (e instanceof TypeError) {
+                    message = t.errorNetwork;
+                }
+                statusDiv.textContent = message + '\n' + t.statusSavedLocal;
+            }
+        }
+
+        function renderEntries() {
+            const t = translations[currentLang];
+            entryListDiv.innerHTML = '';
+            if (entries.length === 0) {
+                entryListDiv.innerHTML = `<p>${t.noEntries}</p>`;
+                return;
+            }
+            const sorted = [...entries].sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+            sorted.forEach(entry => {
+                const card = document.createElement('div');
+                card.className = 'entry-card';
+
+                let badgeHtml = '';
+                let details = '';
+                switch (entry.type) {
+                    case 'biberon':
+                        badgeHtml = `<span class="badge badge-biberon">${t.badgeBiberon}</span>`;
+                        details = t.detailsBiberon(entry.quantite, entry.description);
+                        break;
+                    case 'repas':
+                        badgeHtml = `<span class="badge badge-repas">${t.badgeRepas}</span>`;
+                        details = t.detailsRepas(entry.description, entry.quantite);
+                        break;
+                    case 'pipi':
+                        badgeHtml = `<span class="badge badge-pipi">${t.badgePipi}</span>`;
+                        details = t.detailsPipi;
+                        break;
+                    case 'caca':
+                        badgeHtml = `<span class="badge badge-caca">${t.badgeCaca}</span>`;
+                        details = t.detailsCaca(entry.consistance);
+                        break;
+                    case 'bain':
+                        badgeHtml = `<span class="badge badge-bain">${t.badgeBain}</span>`;
+                        details = t.detailsBain;
+                        break;
+                    case 'medicament':
+                        badgeHtml = `<span class="badge badge-medicament">${t.badgeMedicament}</span>`;
+                        details = t.detailsMedicament(entry.nom, entry.dose);
+                        break;
+                    case 'autre':
+                        badgeHtml = `<span class="badge badge-autre">${t.badgeAutre}</span>`;
+                        details = t.detailsAutre;
+                        break;
+                }
+
+                const dateFormatted = new Date(entry.date).toLocaleString(currentLang === 'fr' ? 'fr-FR' : 'en-US', {
+                    day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
+                });
+
+                card.innerHTML = `
+                    <div class="actions">
+                        <button class="edit-btn" title="${t.editTitle}">✏️</button>
+                        <button class="delete-btn" title="${t.deleteTitle}">🗑️</button>
+                    </div>
+                    <div style="margin-bottom:0.3rem;">${badgeHtml} <small>${dateFormatted}</small></div>
+                    <div>${details}</div>
+                    ${entry.notes ? '<div style="font-style:italic; margin-top:0.3rem;">' + entry.notes + '</div>' : ''}
+                `;
+                card.querySelector('.edit-btn').addEventListener('click', () => editEntry(entry));
+                card.querySelector('.delete-btn').addEventListener('click', () => deleteEntry(entry.id));
+                entryListDiv.appendChild(card);
+            });
+        }
+
+        async function deleteEntry(id) {
+            const t = translations[currentLang];
+            if (!confirm(t.deleteConfirm)) return;
+            entries = entries.filter(e => e.id !== id);
+            await saveData();
+            renderEntries();
+            if (editingId === id) resetForm();
+        }
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const type = eventTypeSelect.value;
+            const date = eventDateInput.value;
+            if (!type || !date) return;
+
+            const newEntry = {
+                id: editingId || generateId(),
+                type: type,
+                date: date,
+                notes: notesInput.value.trim()
+            };
+
+            if (type === 'biberon') {
+                newEntry.quantite = biberonQuantite.value.trim();
+                newEntry.description = biberonType.value.trim();
+            } else if (type === 'repas') {
+                newEntry.description = repasDescription.value.trim();
+                newEntry.quantite = repasQuantite.value.trim();
+            } else if (type === 'caca') {
+                newEntry.consistance = cacaConsistance.value;
+            } else if (type === 'medicament') {
+                newEntry.nom = medicamentNom.value.trim();
+                newEntry.dose = medicamentDose.value.trim();
+            }
+
+            if (editingId) {
+                const index = entries.findIndex(e => e.id === editingId);
+                if (index !== -1) entries[index] = newEntry;
+            } else {
+                entries.push(newEntry);
+            }
+
+            await saveData();
+            resetForm();
+            renderEntries();
+        });
+
+        cancelButton.addEventListener('click', resetForm);
+
+        applyLanguage(currentLang);
+        loadData();
+    </script>
+</body>
+</html>
