@@ -72,13 +72,19 @@
             line-height: 1.3;
         }
         .alert {
-            background: #fef3cd;
-            color: #856404;
             padding: 0.5rem;
             border-radius: 8px;
             margin-bottom: 1rem;
             text-align: center;
             font-weight: bold;
+        }
+        .alert-warning {
+            background: #fef3cd;
+            color: #856404;
+        }
+        .alert-info {
+            background: #d1ecf1;
+            color: #0c5460;
         }
         form {
             background: var(--card-bg);
@@ -206,7 +212,8 @@
     <div class="subtitle" id="subtitle"></div>
     <div class="daily-summary" id="dailySummary"></div>
     <div class="status" id="status"></div>
-    <div id="appointmentAlert" class="alert" style="display:none;"></div>
+    <div id="appointmentAlert" class="alert alert-warning" style="display:none;"></div>
+    <div id="medicationAlert" class="alert alert-info" style="display:none;"></div>
 
     <form id="mainForm">
         <input type="hidden" id="entryId">
@@ -313,6 +320,7 @@
                 errorServer: '❌ Erreur serveur Firebase.',
                 errorFormat: '❌ Les données ne sont pas un tableau valide.',
                 appointmentSoon: '⚠️ Prochain RDV dans {days} jour(s) : {desc}',
+                medicationRecent: '⚠️ {name} pris il y a {h}h{min}. Attendre encore {remaining}h{remainingMin} avant la prochaine dose.',
                 eventTypeLabel: "Type d'événement *",
                 choose: '-- Choisis --',
                 biberon: '🍼 Biberon',
@@ -414,6 +422,7 @@
                 errorServer: '❌ Firebase server error.',
                 errorFormat: '❌ Data is not a valid array.',
                 appointmentSoon: '⚠️ Upcoming appointment in {days} day(s): {desc}',
+                medicationRecent: '⚠️ {name} taken {h}h{min} ago. Wait {remaining}h{remainingMin} before next dose.',
                 eventTypeLabel: 'Event type *',
                 choose: '-- Choose --',
                 biberon: '🍼 Bottle',
@@ -508,6 +517,7 @@
         let editingId = null;
         let filterDate = '';
         let filterType = '';
+        let medicationTimerInterval = null;
 
         // Appliquer le thème
         function applyTheme(theme) {
@@ -528,6 +538,7 @@
         const dailySummaryEl = document.getElementById('dailySummary');
         const statusDiv = document.getElementById('status');
         const appointmentAlert = document.getElementById('appointmentAlert');
+        const medicationAlert = document.getElementById('medicationAlert');
         const form = document.getElementById('mainForm');
         const entryIdInput = document.getElementById('entryId');
         const eventTypeSelect = document.getElementById('eventType');
@@ -656,7 +667,6 @@
 
             resetForm(); // remet à neuf les autres champs, mais remet editingId à null
             if (editingId) {
-                // Réassigner editingId car resetForm l'a mis à null
                 editingId = entries.find(e => e.id === editingId)?.id || null;
                 if (editingId) {
                     saveButton.textContent = t.updateBtn;
@@ -665,6 +675,7 @@
             }
             renderEntries();
             updateAppointmentAlert();
+            updateMedicationAlert();
             updateDailySummary();
             if (entries.length > 0) {
                 statusDiv.textContent = t.statusCloud;
@@ -784,6 +795,47 @@
                 return `${count} ${badge}`;
             });
             dailySummaryEl.textContent = t.dailySummary.replace('{summary}', parts.join(', '));
+        }
+
+        // Alerte médicament (Doliprane/Tylenol)
+        function updateMedicationAlert() {
+            const t = translations[currentLang];
+            const now = new Date();
+            let latestMed = null;
+            // Chercher le dernier médicament contenant "doliprane" ou "tylenol" (insensible à la casse)
+            for (const entry of entries) {
+                if (entry.type === 'medicament' && entry.nom) {
+                    const nameLower = entry.nom.toLowerCase();
+                    if (nameLower.includes('doliprane') || nameLower.includes('tylenol')) {
+                        const medDate = new Date(entry.date);
+                        if (medDate <= now && (!latestMed || medDate > new Date(latestMed.date))) {
+                            latestMed = entry;
+                        }
+                    }
+                }
+            }
+            if (!latestMed) {
+                medicationAlert.style.display = 'none';
+                return;
+            }
+            const elapsedMs = now - new Date(latestMed.date);
+            const elapsedHours = Math.floor(elapsedMs / 3600000);
+            const elapsedMinutes = Math.floor((elapsedMs % 3600000) / 60000);
+            const sixHoursMs = 6 * 3600000;
+            if (elapsedMs < sixHoursMs) {
+                const remainingMs = sixHoursMs - elapsedMs;
+                const remainingHours = Math.floor(remainingMs / 3600000);
+                const remainingMinutes = Math.floor((remainingMs % 3600000) / 60000);
+                medicationAlert.style.display = 'block';
+                medicationAlert.textContent = t.medicationRecent
+                    .replace('{name}', latestMed.nom)
+                    .replace('{h}', elapsedHours)
+                    .replace('{min}', elapsedMinutes > 0 ? ' ' + elapsedMinutes + 'min' : '')
+                    .replace('{remaining}', remainingHours)
+                    .replace('{remainingMin}', remainingMinutes > 0 ? ' ' + remainingMinutes + 'min' : '');
+            } else {
+                medicationAlert.style.display = 'none';
+            }
         }
 
         // Filtrage
@@ -961,6 +1013,7 @@
             }
             renderEntries();
             updateAppointmentAlert();
+            updateMedicationAlert();
             updateDailySummary();
         }
 
@@ -986,6 +1039,7 @@
                 statusDiv.textContent = message + '\n' + t.statusSavedLocal;
             }
             updateAppointmentAlert();
+            updateMedicationAlert();
             updateDailySummary();
         }
 
@@ -1026,13 +1080,9 @@
                 newEntry.rdvDesc = rdvDesc.value.trim();
                 newEntry.rdvDate = rdvDate.value;
             } else if (type === 'temp') {
-                let tempValueStr = tempValue.value.trim();
-                if (tempValueStr !== '') {
-                    if (currentLang === 'en') {
-                        newEntry.temp = fToC(tempValueStr);
-                    } else {
-                        newEntry.temp = tempValueStr;
-                    }
+                let tempVal = tempValue.value.trim();
+                if (tempVal !== '') {
+                    newEntry.temp = currentLang === 'en' ? fToC(tempVal) : tempVal;
                 } else {
                     newEntry.temp = '';
                 }
@@ -1054,6 +1104,13 @@
         });
 
         cancelButton.addEventListener('click', resetForm);
+
+        // Lancer une vérification périodique du médicament toutes les 30 secondes
+        function startMedicationTimer() {
+            if (medicationTimerInterval) clearInterval(medicationTimerInterval);
+            medicationTimerInterval = setInterval(updateMedicationAlert, 30000);
+        }
+        startMedicationTimer();
 
         applyLanguage(currentLang);
         loadData();
