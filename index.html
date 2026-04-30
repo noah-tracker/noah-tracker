@@ -78,14 +78,8 @@
             text-align: center;
             font-weight: bold;
         }
-        .alert-warning {
-            background: #fef3cd;
-            color: #856404;
-        }
-        .alert-info {
-            background: #d1ecf1;
-            color: #0c5460;
-        }
+        .alert-warning { background: #fef3cd; color: #856404; }
+        .alert-info { background: #d1ecf1; color: #0c5460; }
         form {
             background: var(--card-bg);
             padding: 1.2rem;
@@ -166,6 +160,7 @@
         .badge-bain { background: #2980b9; }
         .badge-medicament { background: #e67e22; }
         .badge-temp { background: #e74c3c; }
+        .badge-mesures { background: #16a085; }
         .badge-autre { background: #95a5a6; }
         hr { margin: 0.8rem 0; border-color: var(--border); }
 
@@ -268,6 +263,14 @@
             <input type="number" id="tempValue" step="0.1" placeholder="">
         </div>
 
+        <!-- Mesures (poids / taille) -->
+        <div id="fieldsMesures" class="extra-fields">
+            <label for="poidsValue" id="lblPoids"></label>
+            <input type="number" id="poidsValue" step="0.1" placeholder="">
+            <label for="tailleValue" id="lblTaille"></label>
+            <input type="number" id="tailleValue" step="0.1" placeholder="">
+        </div>
+
         <!-- Médicament -->
         <div id="fieldsMedicament" class="extra-fields">
             <label for="medicamentNom" id="lblMedNom"></label>
@@ -330,6 +333,7 @@
                 sommeil: '😴 Sommeil',
                 rdv: '📅 Rendez-vous',
                 temp: '🌡️ Température',
+                mesures: '📏 Mesures (poids/taille)',
                 bain: '🛁 Bain',
                 medicament: '💊 Médicament',
                 autre: '📝 Autre',
@@ -354,6 +358,10 @@
                 rdvDateLabel: 'Date du rendez-vous *',
                 tempLabel: 'Température (°C)',
                 tempPlaceholder: 'Ex: 37.5',
+                poidsLabel: 'Poids (kg)',
+                poidsPlaceholder: 'Ex: 8.5',
+                tailleLabel: 'Taille (cm)',
+                taillePlaceholder: 'Ex: 72',
                 medNomLabel: 'Nom du médicament *',
                 medNomPlaceholder: 'Ex : Doliprane, Advil...',
                 medDoseLabel: 'Dose / quantité',
@@ -379,6 +387,7 @@
                 badgeSommeil: '😴 Sommeil',
                 badgeRdv: '📅 Rendez-vous',
                 badgeTemp: '🌡️ Température',
+                badgeMesures: '📏 Mesures',
                 badgeBain: '🛁 Bain',
                 badgeMedicament: '💊 Médicament',
                 badgeAutre: '📝 Autre',
@@ -402,6 +411,18 @@
                     const c = parseFloat(val);
                     if (lang === 'en') return ((c * 9/5 + 32).toFixed(1)) + ' °F';
                     return c + ' °C';
+                },
+                detailsMesures: (poids, taille, lang) => {
+                    const parts = [];
+                    if (poids && poids !== '0') {
+                        const kg = parseFloat(poids);
+                        parts.push(lang === 'en' ? `${(kg * 2.20462).toFixed(1)} lb` : `${kg} kg`);
+                    }
+                    if (taille && taille !== '0') {
+                        const cm = parseFloat(taille);
+                        parts.push(lang === 'en' ? `${(cm / 2.54).toFixed(1)} in` : `${cm} cm`);
+                    }
+                    return parts.join(' / ') || 'Mesures';
                 },
                 detailsBain: 'Bain',
                 detailsMedicament: (nom, dose) => `<strong>${nom || 'Médicament'}</strong>${dose ? ' – ' + dose : ''}`,
@@ -432,6 +453,7 @@
                 sommeil: '😴 Sleep',
                 rdv: '📅 Appointment',
                 temp: '🌡️ Temperature',
+                mesures: '📏 Measurements (weight/height)',
                 bain: '🛁 Bath',
                 medicament: '💊 Medication',
                 autre: '📝 Other',
@@ -456,6 +478,10 @@
                 rdvDateLabel: 'Appointment date *',
                 tempLabel: 'Temperature (°F)',
                 tempPlaceholder: 'E.g. 98.6',
+                poidsLabel: 'Weight (lb)',
+                poidsPlaceholder: 'E.g. 18.7',
+                tailleLabel: 'Height (in)',
+                taillePlaceholder: 'E.g. 28.3',
                 medNomLabel: 'Medication name *',
                 medNomPlaceholder: 'E.g. Tylenol, Advil...',
                 medDoseLabel: 'Dose / amount',
@@ -481,6 +507,7 @@
                 badgeSommeil: '😴 Sleep',
                 badgeRdv: '📅 Appointment',
                 badgeTemp: '🌡️ Temperature',
+                badgeMesures: '📏 Measurements',
                 badgeBain: '🛁 Bath',
                 badgeMedicament: '💊 Medication',
                 badgeAutre: '📝 Other',
@@ -504,6 +531,18 @@
                     const c = parseFloat(val);
                     if (lang === 'en') return ((c * 9/5 + 32).toFixed(1)) + ' °F';
                     return c + ' °C';
+                },
+                detailsMesures: (poids, taille, lang) => {
+                    const parts = [];
+                    if (poids && poids !== '0') {
+                        const kg = parseFloat(poids);
+                        parts.push(lang === 'en' ? `${(kg * 2.20462).toFixed(1)} lb` : `${kg} kg`);
+                    }
+                    if (taille && taille !== '0') {
+                        const cm = parseFloat(taille);
+                        parts.push(lang === 'en' ? `${(cm / 2.54).toFixed(1)} in` : `${cm} cm`);
+                    }
+                    return parts.join(' / ') || 'Measurements';
                 },
                 detailsBain: 'Bath',
                 detailsMedicament: (nom, dose) => `<strong>${nom || 'Medication'}</strong>${dose ? ' – ' + dose : ''}`,
@@ -561,6 +600,7 @@
         const fieldsSommeil = document.getElementById('fieldsSommeil');
         const fieldsRdv = document.getElementById('fieldsRdv');
         const fieldsTemp = document.getElementById('fieldsTemp');
+        const fieldsMesures = document.getElementById('fieldsMesures');
         const fieldsMedicament = document.getElementById('fieldsMedicament');
         const biberonQuantite = document.getElementById('biberonQuantite');
         const biberonType = document.getElementById('biberonType');
@@ -572,6 +612,8 @@
         const rdvDesc = document.getElementById('rdvDesc');
         const rdvDate = document.getElementById('rdvDate');
         const tempValue = document.getElementById('tempValue');
+        const poidsValue = document.getElementById('poidsValue');
+        const tailleValue = document.getElementById('tailleValue');
         const medicamentNom = document.getElementById('medicamentNom');
         const medicamentDose = document.getElementById('medicamentDose');
 
@@ -582,12 +624,24 @@
             applyTheme(currentTheme);
         });
 
-        // Conversion température
+        // Conversions
         function cToF(celsius) {
             return (parseFloat(celsius) * 9/5 + 32).toFixed(1);
         }
         function fToC(fahrenheit) {
             return ((parseFloat(fahrenheit) - 32) * 5/9).toFixed(1);
+        }
+        function kgToLb(kg) {
+            return (parseFloat(kg) * 2.20462).toFixed(1);
+        }
+        function lbToKg(lb) {
+            return (parseFloat(lb) / 2.20462).toFixed(1);
+        }
+        function cmToIn(cm) {
+            return (parseFloat(cm) / 2.54).toFixed(1);
+        }
+        function inToCm(inches) {
+            return (parseFloat(inches) * 2.54).toFixed(1);
         }
 
         function applyLanguage(lang) {
@@ -605,6 +659,7 @@
                 <option value="sommeil">${t.sommeil}</option>
                 <option value="rdv">${t.rdv}</option>
                 <option value="temp">${t.temp}</option>
+                <option value="mesures">${t.mesures}</option>
                 <option value="bain">${t.bain}</option>
                 <option value="medicament">${t.medicament}</option>
                 <option value="autre">${t.autre}</option>
@@ -633,6 +688,10 @@
             document.getElementById('lblRdvDate').textContent = t.rdvDateLabel;
             document.getElementById('lblTempValue').textContent = t.tempLabel;
             tempValue.placeholder = t.tempPlaceholder;
+            document.getElementById('lblPoids').textContent = t.poidsLabel;
+            poidsValue.placeholder = t.poidsPlaceholder;
+            document.getElementById('lblTaille').textContent = t.tailleLabel;
+            tailleValue.placeholder = t.taillePlaceholder;
             document.getElementById('lblMedNom').textContent = t.medNomLabel;
             medicamentNom.placeholder = t.medNomPlaceholder;
             document.getElementById('lblMedDose').textContent = t.medDoseLabel;
@@ -646,26 +705,31 @@
             document.getElementById('lblFilterDate').textContent = t.filterDate;
             document.getElementById('lblFilterType').textContent = t.filterType;
             filterTypeSelect.innerHTML = `<option value="">${t.filterAll}</option>` +
-                ['biberon','repas','pipi','caca','sommeil','rdv','temp','bain','medicament','autre']
+                ['biberon','repas','pipi','caca','sommeil','rdv','temp','mesures','bain','medicament','autre']
                     .map(type => `<option value="${type}">${t[type] || type}</option>`).join('');
 
-            // Mettre à jour la température si on édite une entrée
+            // Convertir les champs en cours d'édition si nécessaire
             if (editingId) {
                 const entry = entries.find(e => e.id === editingId);
-                if (entry && entry.type === 'temp' && entry.temp) {
-                    if (lang === 'en') {
-                        tempValue.value = cToF(entry.temp);
+                if (entry) {
+                    if (entry.type === 'temp' && entry.temp) {
+                        tempValue.value = lang === 'en' ? cToF(entry.temp) : entry.temp;
+                    } else tempValue.value = entry.temp || '';
+                    if (entry.type === 'mesures') {
+                        poidsValue.value = (entry.poids && lang === 'en') ? kgToLb(entry.poids) : (entry.poids || '');
+                        tailleValue.value = (entry.taille && lang === 'en') ? cmToIn(entry.taille) : (entry.taille || '');
                     } else {
-                        tempValue.value = entry.temp;
+                        poidsValue.value = entry.poids || '';
+                        tailleValue.value = entry.taille || '';
                     }
-                } else {
-                    tempValue.value = '';
                 }
             } else {
                 tempValue.value = '';
+                poidsValue.value = '';
+                tailleValue.value = '';
             }
 
-            resetForm(); // remet à neuf les autres champs, mais remet editingId à null
+            resetForm(); // resetForm met editingId à null, on le restaure
             if (editingId) {
                 editingId = entries.find(e => e.id === editingId)?.id || null;
                 if (editingId) {
@@ -692,7 +756,7 @@
 
         function updateExtraFields() {
             const type = eventTypeSelect.value;
-            [fieldsBiberon, fieldsRepas, fieldsCaca, fieldsSommeil, fieldsRdv, fieldsTemp, fieldsMedicament]
+            [fieldsBiberon, fieldsRepas, fieldsCaca, fieldsSommeil, fieldsRdv, fieldsTemp, fieldsMesures, fieldsMedicament]
                 .forEach(el => el.classList.remove('active'));
             biberonQuantite.required = false;
             repasDescription.required = false;
@@ -713,6 +777,8 @@
                 rdvDate.required = true;
             } else if (type === 'temp') {
                 fieldsTemp.classList.add('active');
+            } else if (type === 'mesures') {
+                fieldsMesures.classList.add('active');
             } else if (type === 'medicament') {
                 fieldsMedicament.classList.add('active');
                 medicamentNom.required = true;
@@ -735,6 +801,8 @@
             rdvDesc.value = '';
             rdvDate.value = '';
             tempValue.value = '';
+            poidsValue.value = '';
+            tailleValue.value = '';
             medicamentNom.value = '';
             medicamentDose.value = '';
             updateExtraFields();
@@ -759,11 +827,16 @@
             rdvDate.value = entry.rdvDate || '';
             medicamentNom.value = entry.nom || '';
             medicamentDose.value = entry.dose || '';
-            // Température : convertir selon la langue
+            // Température et mesures avec conversion
             if (entry.type === 'temp' && entry.temp) {
                 tempValue.value = currentLang === 'en' ? cToF(entry.temp) : entry.temp;
+            } else tempValue.value = entry.temp || '';
+            if (entry.type === 'mesures') {
+                poidsValue.value = (entry.poids && currentLang === 'en') ? kgToLb(entry.poids) : (entry.poids || '');
+                tailleValue.value = (entry.taille && currentLang === 'en') ? cmToIn(entry.taille) : (entry.taille || '');
             } else {
-                tempValue.value = entry.temp || '';
+                poidsValue.value = entry.poids || '';
+                tailleValue.value = entry.taille || '';
             }
             updateExtraFields();
             editingId = entry.id;
@@ -802,7 +875,6 @@
             const t = translations[currentLang];
             const now = new Date();
             let latestMed = null;
-            // Chercher le dernier médicament contenant "doliprane" ou "tylenol" (insensible à la casse)
             for (const entry of entries) {
                 if (entry.type === 'medicament' && entry.nom) {
                     const nameLower = entry.nom.toLowerCase();
@@ -893,6 +965,10 @@
                     case 'temp':
                         badgeHtml = `<span class="badge badge-temp">${t.badgeTemp}</span>`;
                         details = t.detailsTemp(entry.temp, currentLang);
+                        break;
+                    case 'mesures':
+                        badgeHtml = `<span class="badge badge-mesures">${t.badgeMesures}</span>`;
+                        details = t.detailsMesures(entry.poids, entry.taille, currentLang);
                         break;
                     case 'bain':
                         badgeHtml = `<span class="badge badge-bain">${t.badgeBain}</span>`;
@@ -1085,6 +1161,19 @@
                     newEntry.temp = currentLang === 'en' ? fToC(tempVal) : tempVal;
                 } else {
                     newEntry.temp = '';
+                }
+            } else if (type === 'mesures') {
+                let poidsVal = poidsValue.value.trim();
+                if (poidsVal !== '') {
+                    newEntry.poids = currentLang === 'en' ? lbToKg(poidsVal) : poidsVal;
+                } else {
+                    newEntry.poids = '';
+                }
+                let tailleVal = tailleValue.value.trim();
+                if (tailleVal !== '') {
+                    newEntry.taille = currentLang === 'en' ? inToCm(tailleVal) : tailleVal;
+                } else {
+                    newEntry.taille = '';
                 }
             } else if (type === 'medicament') {
                 newEntry.nom = medicamentNom.value.trim();
