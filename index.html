@@ -12,6 +12,7 @@
             --card-bg: #fff;
             --text: #2c3e50;
             --danger: #e74c3c;
+            --warning: #f39c12;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
@@ -28,10 +29,7 @@
             align-items: center;
             margin-bottom: 0.5rem;
         }
-        h1 {
-            color: var(--primary);
-            margin: 0;
-        }
+        h1 { color: var(--primary); margin: 0; }
         .lang-toggle {
             background: var(--primary);
             color: white;
@@ -55,6 +53,15 @@
             margin-bottom: 1rem;
             white-space: pre-line;
             line-height: 1.3;
+        }
+        .alert {
+            background: #fef3cd;
+            color: #856404;
+            padding: 0.5rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            text-align: center;
+            font-weight: bold;
         }
         form {
             background: var(--card-bg);
@@ -131,17 +138,15 @@
         .badge-repas { background: #27ae60; }
         .badge-pipi { background: #3498db; }
         .badge-caca { background: #8e44ad; }
+        .badge-sommeil { background: #e67e22; }
+        .badge-rdv { background: #e74c3c; }
         .badge-bain { background: #2980b9; }
         .badge-medicament { background: #e67e22; }
         .badge-autre { background: #95a5a6; }
         hr { margin: 0.8rem 0; border-color: #eee; }
 
-        .extra-fields {
-            display: none;
-        }
-        .extra-fields.active {
-            display: block;
-        }
+        .extra-fields { display: none; }
+        .extra-fields.active { display: block; }
     </style>
 </head>
 <body>
@@ -151,10 +156,11 @@
     </div>
     <div class="subtitle" id="subtitle"></div>
     <div class="status" id="status"></div>
+    <div id="appointmentAlert" class="alert" style="display:none;"></div>
 
     <form id="mainForm">
         <input type="hidden" id="entryId">
-        
+
         <label for="eventType" id="lblEventType"></label>
         <select id="eventType" required></select>
 
@@ -177,10 +183,26 @@
             <input type="text" id="repasQuantite" placeholder="">
         </div>
 
-        <!-- Caca (a consistance) -->
+        <!-- Caca -->
         <div id="fieldsCaca" class="extra-fields">
             <label id="lblConsistanceCaca"></label>
             <select id="cacaConsistance"></select>
+        </div>
+
+        <!-- Sommeil -->
+        <div id="fieldsSommeil" class="extra-fields">
+            <label for="sleepStart" id="lblSleepStart"></label>
+            <input type="datetime-local" id="sleepStart">
+            <label for="sleepEnd" id="lblSleepEnd"></label>
+            <input type="datetime-local" id="sleepEnd">
+        </div>
+
+        <!-- Rendez-vous -->
+        <div id="fieldsRdv" class="extra-fields">
+            <label for="rdvDesc" id="lblRdvDesc"></label>
+            <input type="text" id="rdvDesc" placeholder="">
+            <label for="rdvDate" id="lblRdvDate"></label>
+            <input type="datetime-local" id="rdvDate">
         </div>
 
         <!-- Médicament -->
@@ -208,8 +230,6 @@
         const FIREBASE_URL = 'https://noah-tracker-c27f4-default-rtdb.europe-west1.firebasedatabase.app/entries.json';
         const FIREBASE_SECRET = '4X64T2m3GOO08BwgvnBgHesQ0gXCEcv34HQ5ufwX';
         // =================================================
-
-        // Le secret est transmis comme paramètre "auth" dans l'URL
         const AUTH_PARAM = `auth=${FIREBASE_SECRET}`;
 
         const translations = {
@@ -225,12 +245,15 @@
                 errorAuth: '❌ Accès refusé (authentification). Vérifie le secret Firebase.',
                 errorServer: '❌ Erreur serveur Firebase.',
                 errorFormat: '❌ Les données ne sont pas un tableau valide.',
+                appointmentSoon: '⚠️ Prochain RDV dans {days} jour(s) : {desc}',
                 eventTypeLabel: "Type d'événement *",
                 choose: '-- Choisis --',
                 biberon: '🍼 Biberon',
                 repas: '🍽️ Repas solide',
                 pipi: '💧 Pipi',
                 caca: '💩 Caca',
+                sommeil: '😴 Sommeil',
+                rdv: '📅 Rendez-vous',
                 bain: '🛁 Bain',
                 medicament: '💊 Médicament',
                 autre: '📝 Autre',
@@ -249,6 +272,10 @@
                 molles: 'Molles',
                 solides: 'Solides',
                 dures: 'Dures',
+                sleepStartLabel: 'Heure d\'endormissement',
+                sleepEndLabel: 'Heure de réveil',
+                rdvDescLabel: 'Description (ex: Pédiatre)',
+                rdvDateLabel: 'Date du rendez-vous *',
                 medNomLabel: 'Nom du médicament *',
                 medNomPlaceholder: 'Ex : Doliprane, Advil...',
                 medDoseLabel: 'Dose / quantité',
@@ -267,6 +294,8 @@
                 badgeRepas: '🍽️ Repas solide',
                 badgePipi: '💧 Pipi',
                 badgeCaca: '💩 Caca',
+                badgeSommeil: '😴 Sommeil',
+                badgeRdv: '📅 Rendez-vous',
                 badgeBain: '🛁 Bain',
                 badgeMedicament: '💊 Médicament',
                 badgeAutre: '📝 Autre',
@@ -274,6 +303,17 @@
                 detailsRepas: (desc, qty) => `<strong>${desc || 'Repas'}</strong>${qty ? ' – ' + qty : ''}`,
                 detailsPipi: 'Pipi',
                 detailsCaca: (consistance) => consistance ? `Caca (${consistance})` : 'Caca',
+                detailsSommeil: (start, end) => {
+                    if (start && end) {
+                        const duree = Math.round((new Date(end) - new Date(start)) / 3600000 * 10) / 10;
+                        return `Endormi à ${new Date(start).toLocaleTimeString('fr', {hour:'2-digit', minute:'2-digit'})}, réveil à ${new Date(end).toLocaleTimeString('fr', {hour:'2-digit', minute:'2-digit'})} (${duree}h)`;
+                    } else if (start) {
+                        return `Endormi à ${new Date(start).toLocaleTimeString('fr', {hour:'2-digit', minute:'2-digit'})}`;
+                    } else {
+                        return 'Détails du sommeil incomplets';
+                    }
+                },
+                detailsRdv: (date, desc) => `${desc || 'Rendez-vous'} le ${new Date(date).toLocaleString('fr', {day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'})}`,
                 detailsBain: 'Bain',
                 detailsMedicament: (nom, dose) => `<strong>${nom || 'Médicament'}</strong>${dose ? ' – ' + dose : ''}`,
                 detailsAutre: 'Événement divers'
@@ -290,12 +330,15 @@
                 errorAuth: '❌ Access denied (auth). Check Firebase secret.',
                 errorServer: '❌ Firebase server error.',
                 errorFormat: '❌ Data is not a valid array.',
+                appointmentSoon: '⚠️ Upcoming appointment in {days} day(s): {desc}',
                 eventTypeLabel: 'Event type *',
                 choose: '-- Choose --',
                 biberon: '🍼 Bottle',
                 repas: '🍽️ Solid meal',
                 pipi: '💧 Pee',
                 caca: '💩 Poop',
+                sommeil: '😴 Sleep',
+                rdv: '📅 Appointment',
                 bain: '🛁 Bath',
                 medicament: '💊 Medication',
                 autre: '📝 Other',
@@ -314,6 +357,10 @@
                 molles: 'Soft',
                 solides: 'Solid',
                 dures: 'Hard',
+                sleepStartLabel: 'Fell asleep at',
+                sleepEndLabel: 'Woke up at',
+                rdvDescLabel: 'Description (e.g. Pediatrician)',
+                rdvDateLabel: 'Appointment date *',
                 medNomLabel: 'Medication name *',
                 medNomPlaceholder: 'E.g. Tylenol, Advil...',
                 medDoseLabel: 'Dose / amount',
@@ -332,6 +379,8 @@
                 badgeRepas: '🍽️ Solid meal',
                 badgePipi: '💧 Pee',
                 badgeCaca: '💩 Poop',
+                badgeSommeil: '😴 Sleep',
+                badgeRdv: '📅 Appointment',
                 badgeBain: '🛁 Bath',
                 badgeMedicament: '💊 Medication',
                 badgeAutre: '📝 Other',
@@ -339,6 +388,17 @@
                 detailsRepas: (desc, qty) => `<strong>${desc || 'Meal'}</strong>${qty ? ' – ' + qty : ''}`,
                 detailsPipi: 'Pee',
                 detailsCaca: (consistance) => consistance ? `Poop (${consistance})` : 'Poop',
+                detailsSommeil: (start, end) => {
+                    if (start && end) {
+                        const duree = Math.round((new Date(end) - new Date(start)) / 3600000 * 10) / 10;
+                        return `Fell asleep at ${new Date(start).toLocaleTimeString('en', {hour:'2-digit', minute:'2-digit'})}, woke up at ${new Date(end).toLocaleTimeString('en', {hour:'2-digit', minute:'2-digit'})} (${duree}h)`;
+                    } else if (start) {
+                        return `Fell asleep at ${new Date(start).toLocaleTimeString('en', {hour:'2-digit', minute:'2-digit'})}`;
+                    } else {
+                        return 'Sleep details incomplete';
+                    }
+                },
+                detailsRdv: (date, desc) => `${desc || 'Appointment'} on ${new Date(date).toLocaleString('en', {day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'})}`,
                 detailsBain: 'Bath',
                 detailsMedicament: (nom, dose) => `<strong>${nom || 'Medication'}</strong>${dose ? ' – ' + dose : ''}`,
                 detailsAutre: 'Other event'
@@ -353,6 +413,7 @@
         const langToggle = document.getElementById('langToggle');
         const subtitleEl = document.getElementById('subtitle');
         const statusDiv = document.getElementById('status');
+        const appointmentAlert = document.getElementById('appointmentAlert');
         const form = document.getElementById('mainForm');
         const entryIdInput = document.getElementById('entryId');
         const eventTypeSelect = document.getElementById('eventType');
@@ -367,12 +428,18 @@
         const fieldsBiberon = document.getElementById('fieldsBiberon');
         const fieldsRepas = document.getElementById('fieldsRepas');
         const fieldsCaca = document.getElementById('fieldsCaca');
+        const fieldsSommeil = document.getElementById('fieldsSommeil');
+        const fieldsRdv = document.getElementById('fieldsRdv');
         const fieldsMedicament = document.getElementById('fieldsMedicament');
         const biberonQuantite = document.getElementById('biberonQuantite');
         const biberonType = document.getElementById('biberonType');
         const repasDescription = document.getElementById('repasDescription');
         const repasQuantite = document.getElementById('repasQuantite');
         const cacaConsistance = document.getElementById('cacaConsistance');
+        const sleepStart = document.getElementById('sleepStart');
+        const sleepEnd = document.getElementById('sleepEnd');
+        const rdvDesc = document.getElementById('rdvDesc');
+        const rdvDate = document.getElementById('rdvDate');
         const medicamentNom = document.getElementById('medicamentNom');
         const medicamentDose = document.getElementById('medicamentDose');
 
@@ -388,6 +455,8 @@
                 <option value="repas">${t.repas}</option>
                 <option value="pipi">${t.pipi}</option>
                 <option value="caca">${t.caca}</option>
+                <option value="sommeil">${t.sommeil}</option>
+                <option value="rdv">${t.rdv}</option>
                 <option value="bain">${t.bain}</option>
                 <option value="medicament">${t.medicament}</option>
                 <option value="autre">${t.autre}</option>
@@ -409,6 +478,11 @@
                 <option value="solides">${t.solides}</option>
                 <option value="dures">${t.dures}</option>
             `;
+            document.getElementById('lblSleepStart').textContent = t.sleepStartLabel;
+            document.getElementById('lblSleepEnd').textContent = t.sleepEndLabel;
+            document.getElementById('lblRdvDesc').textContent = t.rdvDescLabel;
+            rdvDesc.placeholder = t.rdvDescLabel;
+            document.getElementById('lblRdvDate').textContent = t.rdvDateLabel;
             document.getElementById('lblMedNom').textContent = t.medNomLabel;
             medicamentNom.placeholder = t.medNomPlaceholder;
             document.getElementById('lblMedDose').textContent = t.medDoseLabel;
@@ -421,6 +495,7 @@
 
             resetForm();
             renderEntries();
+            updateAppointmentAlert();
             if (entries.length > 0) {
                 statusDiv.textContent = t.statusCloud;
             } else {
@@ -436,13 +511,12 @@
 
         function updateExtraFields() {
             const type = eventTypeSelect.value;
-            fieldsBiberon.classList.remove('active');
-            fieldsRepas.classList.remove('active');
-            fieldsCaca.classList.remove('active');
-            fieldsMedicament.classList.remove('active');
+            [fieldsBiberon, fieldsRepas, fieldsCaca, fieldsSommeil, fieldsRdv, fieldsMedicament]
+                .forEach(el => el.classList.remove('active'));
             biberonQuantite.required = false;
             repasDescription.required = false;
             medicamentNom.required = false;
+            // Les champs sommeil/rdv ne sont pas required par défaut
 
             if (type === 'biberon') {
                 fieldsBiberon.classList.add('active');
@@ -452,6 +526,11 @@
                 repasDescription.required = true;
             } else if (type === 'caca') {
                 fieldsCaca.classList.add('active');
+            } else if (type === 'sommeil') {
+                fieldsSommeil.classList.add('active');
+            } else if (type === 'rdv') {
+                fieldsRdv.classList.add('active');
+                rdvDate.required = true;
             } else if (type === 'medicament') {
                 fieldsMedicament.classList.add('active');
                 medicamentNom.required = true;
@@ -469,6 +548,10 @@
             repasDescription.value = '';
             repasQuantite.value = '';
             cacaConsistance.value = '';
+            sleepStart.value = '';
+            sleepEnd.value = '';
+            rdvDesc.value = '';
+            rdvDate.value = '';
             medicamentNom.value = '';
             medicamentDose.value = '';
             updateExtraFields();
@@ -482,18 +565,17 @@
             eventTypeSelect.value = entry.type;
             eventDateInput.value = entry.date || '';
             notesInput.value = entry.notes || '';
-            if (entry.type === 'biberon') {
-                biberonQuantite.value = entry.quantite || '';
-                biberonType.value = entry.description || '';
-            } else if (entry.type === 'repas') {
-                repasDescription.value = entry.description || '';
-                repasQuantite.value = entry.quantite || '';
-            } else if (entry.type === 'caca') {
-                cacaConsistance.value = entry.consistance || '';
-            } else if (entry.type === 'medicament') {
-                medicamentNom.value = entry.nom || '';
-                medicamentDose.value = entry.dose || '';
-            }
+            biberonQuantite.value = entry.quantite || '';
+            biberonType.value = entry.description || '';
+            repasDescription.value = entry.description || '';
+            repasQuantite.value = entry.quantite || '';
+            cacaConsistance.value = entry.consistance || '';
+            sleepStart.value = entry.sleepStart || '';
+            sleepEnd.value = entry.sleepEnd || '';
+            rdvDesc.value = entry.rdvDesc || '';
+            rdvDate.value = entry.rdvDate || '';
+            medicamentNom.value = entry.nom || '';
+            medicamentDose.value = entry.dose || '';
             updateExtraFields();
             editingId = entry.id;
             saveButton.textContent = translations[currentLang].updateBtn;
@@ -503,6 +585,32 @@
 
         function generateId() {
             return Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+        }
+
+        // Vérifie les rendez-vous imminents
+        function updateAppointmentAlert() {
+            const t = translations[currentLang];
+            const now = new Date();
+            let closest = null;
+            for (const entry of entries) {
+                if (entry.type === 'rdv' && entry.rdvDate) {
+                    const rdvTime = new Date(entry.rdvDate);
+                    if (rdvTime > now) {
+                        const diffDays = Math.ceil((rdvTime - now) / (1000 * 60 * 60 * 24));
+                        if (diffDays <= 3 && (!closest || diffDays < closest.days)) {
+                            closest = { days: diffDays, desc: entry.rdvDesc || '', date: rdvTime };
+                        }
+                    }
+                }
+            }
+            if (closest) {
+                appointmentAlert.style.display = 'block';
+                appointmentAlert.textContent = t.appointmentSoon
+                    .replace('{days}', closest.days)
+                    .replace('{desc}', closest.desc);
+            } else {
+                appointmentAlert.style.display = 'none';
+            }
         }
 
         async function loadData() {
@@ -515,7 +623,6 @@
                     throw new Error(t.errorServer + ' (' + response.status + ')');
                 }
                 const data = await response.json();
-                // Firebase peut renvoyer null si le chemin n'existe pas encore
                 if (data && Array.isArray(data)) {
                     entries = data;
                 } else {
@@ -526,9 +633,7 @@
             } catch (e) {
                 console.warn('Firebase load error', e);
                 let message = e.message;
-                if (e instanceof TypeError) {
-                    message = t.errorNetwork;
-                }
+                if (e instanceof TypeError) message = t.errorNetwork;
                 statusDiv.textContent = message;
                 const cached = localStorage.getItem('noahCache');
                 if (cached) {
@@ -539,6 +644,7 @@
                 }
             }
             renderEntries();
+            updateAppointmentAlert();
         }
 
         async function saveData() {
@@ -547,9 +653,7 @@
             try {
                 const response = await fetch(`${FIREBASE_URL}?${AUTH_PARAM}`, {
                     method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(entries)
                 });
                 if (response.ok) {
@@ -561,11 +665,10 @@
             } catch (e) {
                 console.error('Firebase save error', e);
                 let message = e.message;
-                if (e instanceof TypeError) {
-                    message = t.errorNetwork;
-                }
+                if (e instanceof TypeError) message = t.errorNetwork;
                 statusDiv.textContent = message + '\n' + t.statusSavedLocal;
             }
+            updateAppointmentAlert();
         }
 
         function renderEntries() {
@@ -598,6 +701,14 @@
                     case 'caca':
                         badgeHtml = `<span class="badge badge-caca">${t.badgeCaca}</span>`;
                         details = t.detailsCaca(entry.consistance);
+                        break;
+                    case 'sommeil':
+                        badgeHtml = `<span class="badge badge-sommeil">${t.badgeSommeil}</span>`;
+                        details = t.detailsSommeil(entry.sleepStart, entry.sleepEnd);
+                        break;
+                    case 'rdv':
+                        badgeHtml = `<span class="badge badge-rdv">${t.badgeRdv}</span>`;
+                        details = t.detailsRdv(entry.rdvDate, entry.rdvDesc);
                         break;
                     case 'bain':
                         badgeHtml = `<span class="badge badge-bain">${t.badgeBain}</span>`;
@@ -662,6 +773,12 @@
                 newEntry.quantite = repasQuantite.value.trim();
             } else if (type === 'caca') {
                 newEntry.consistance = cacaConsistance.value;
+            } else if (type === 'sommeil') {
+                newEntry.sleepStart = sleepStart.value;
+                newEntry.sleepEnd = sleepEnd.value;
+            } else if (type === 'rdv') {
+                newEntry.rdvDesc = rdvDesc.value.trim();
+                newEntry.rdvDate = rdvDate.value;
             } else if (type === 'medicament') {
                 newEntry.nom = medicamentNom.value.trim();
                 newEntry.dose = medicamentDose.value.trim();
