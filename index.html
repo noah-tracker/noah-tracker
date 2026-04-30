@@ -7,12 +7,22 @@
     <link rel="manifest" href="manifest.json">
     <style>
         :root {
+            --primary: #5dade2;
+            --bg: #1e1e2f;
+            --card-bg: #2a2a3c;
+            --text: #e0e0e0;
+            --danger: #e74c3c;
+            --warning: #f39c12;
+            --border: #444;
+        }
+        body.light-mode {
             --primary: #3498db;
             --bg: #f0f8ff;
             --card-bg: #fff;
             --text: #2c3e50;
             --danger: #e74c3c;
             --warning: #f39c12;
+            --border: #ddd;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
@@ -22,6 +32,7 @@
             padding: 1rem;
             max-width: 600px;
             margin: auto;
+            transition: background 0.3s, color 0.3s;
         }
         .header {
             display: flex;
@@ -29,8 +40,9 @@
             align-items: center;
             margin-bottom: 0.5rem;
         }
-        h1 { color: var(--primary); margin: 0; }
-        .lang-toggle {
+        h1 { color: var(--primary); margin: 0; font-size: 1.5rem; }
+        .header-buttons { display: flex; gap: 0.5rem; }
+        .lang-toggle, .theme-toggle {
             background: var(--primary);
             color: white;
             border: none;
@@ -40,11 +52,16 @@
             font-weight: bold;
             cursor: pointer;
         }
-        .subtitle {
+        .subtitle { text-align: center; font-size: 0.9rem; color: #7f8c8d; margin-bottom: 0.5rem; }
+        .daily-summary {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 0.8rem;
+            margin-bottom: 0.8rem;
             text-align: center;
             font-size: 0.9rem;
-            color: #7f8c8d;
-            margin-bottom: 0.8rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border: 1px solid var(--border);
         }
         .status {
             text-align: center;
@@ -69,23 +86,23 @@
             border-radius: 12px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
             margin-bottom: 1.5rem;
+            border: 1px solid var(--border);
         }
         label {
             display: block;
             font-weight: bold;
             margin-top: 0.8rem;
             margin-bottom: 0.2rem;
+            color: var(--text);
         }
-        input[type="datetime-local"],
-        input[type="text"],
-        input[type="number"],
-        select,
-        textarea {
+        input, select, textarea {
             width: 100%;
             padding: 0.6rem;
-            border: 1px solid #ddd;
+            border: 1px solid var(--border);
             border-radius: 8px;
             font-size: 1rem;
+            background: var(--card-bg);
+            color: var(--text);
         }
         button {
             background: var(--primary);
@@ -99,9 +116,7 @@
             margin-top: 1rem;
             width: 100%;
         }
-        button.delete-btn {
-            background: var(--danger);
-        }
+        button.delete-btn { background: var(--danger); }
         .entry-card {
             background: var(--card-bg);
             border-radius: 12px;
@@ -109,6 +124,7 @@
             margin-bottom: 0.8rem;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
             position: relative;
+            border: 1px solid var(--border);
         }
         .entry-card .actions {
             position: absolute;
@@ -124,6 +140,7 @@
             cursor: pointer;
             width: auto;
             padding: 0.2rem 0.4rem;
+            color: var(--text);
         }
         .badge {
             display: inline-block;
@@ -142,19 +159,52 @@
         .badge-rdv { background: #e74c3c; }
         .badge-bain { background: #2980b9; }
         .badge-medicament { background: #e67e22; }
+        .badge-temp { background: #e74c3c; }
         .badge-autre { background: #95a5a6; }
-        hr { margin: 0.8rem 0; border-color: #eee; }
+        hr { margin: 0.8rem 0; border-color: var(--border); }
 
         .extra-fields { display: none; }
         .extra-fields.active { display: block; }
+
+        .filter-bar {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .filter-bar label { margin: 0; font-weight: normal; font-size: 0.9rem; }
+        .filter-bar input, .filter-bar select {
+            width: auto;
+            flex: 1;
+            min-width: 120px;
+            padding: 0.4rem;
+            font-size: 0.9rem;
+        }
+        .filter-bar button {
+            width: auto;
+            padding: 0.4rem 0.8rem;
+            margin-top: 0;
+        }
+        .export-btn {
+            background: #27ae60;
+            margin-top: 0.5rem;
+            width: auto;
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+        }
     </style>
 </head>
 <body>
     <div class="header">
         <h1>🧒 Noah Tracker</h1>
-        <button class="lang-toggle" id="langToggle">EN</button>
+        <div class="header-buttons">
+            <button class="theme-toggle" id="themeToggle">☀️</button>
+            <button class="lang-toggle" id="langToggle">EN</button>
+        </div>
     </div>
     <div class="subtitle" id="subtitle"></div>
+    <div class="daily-summary" id="dailySummary"></div>
     <div class="status" id="status"></div>
     <div id="appointmentAlert" class="alert" style="display:none;"></div>
 
@@ -205,6 +255,12 @@
             <input type="datetime-local" id="rdvDate">
         </div>
 
+        <!-- Température -->
+        <div id="fieldsTemp" class="extra-fields">
+            <label for="tempValue" id="lblTempValue"></label>
+            <input type="number" id="tempValue" step="0.1" placeholder="">
+        </div>
+
         <!-- Médicament -->
         <div id="fieldsMedicament" class="extra-fields">
             <label for="medicamentNom" id="lblMedNom"></label>
@@ -213,7 +269,6 @@
             <input type="text" id="medicamentDose" placeholder="">
         </div>
 
-        <!-- Notes communes -->
         <label for="notes" id="lblNotes"></label>
         <textarea id="notes" rows="2" placeholder=""></textarea>
 
@@ -221,8 +276,18 @@
         <button type="button" id="cancelButton" class="delete-btn" style="display:none;">Annuler modification</button>
     </form>
 
+    <div class="filter-bar">
+        <label for="filterDate" id="lblFilterDate"></label>
+        <input type="date" id="filterDate">
+        <label for="filterType" id="lblFilterType"></label>
+        <select id="filterType"></select>
+        <button id="applyFilter">🔍 Filtrer</button>
+        <button id="clearFilter">✖️ Réinitialiser</button>
+    </div>
+
     <hr>
     <h2 id="historyTitle"></h2>
+    <button id="exportBtn" class="export-btn">📥 Exporter les données</button>
     <div id="entryList"></div>
 
     <script>
@@ -235,6 +300,8 @@
         const translations = {
             fr: {
                 subtitle: 'Suivi quotidien de Noah',
+                dailySummary: 'Aujourd’hui : {summary}',
+                none: 'aucun événement',
                 statusLoading: 'Chargement en cours...',
                 statusCloud: '✅ Données chargées depuis le cloud',
                 statusOffline: '⚠️ Mode hors ligne (données locales)',
@@ -254,6 +321,7 @@
                 caca: '💩 Caca',
                 sommeil: '😴 Sommeil',
                 rdv: '📅 Rendez-vous',
+                temp: '🌡️ Température',
                 bain: '🛁 Bain',
                 medicament: '💊 Médicament',
                 autre: '📝 Autre',
@@ -276,6 +344,8 @@
                 sleepEndLabel: 'Heure de réveil',
                 rdvDescLabel: 'Description (ex: Pédiatre)',
                 rdvDateLabel: 'Date du rendez-vous *',
+                tempLabel: 'Température (°C)',
+                tempPlaceholder: 'Ex: 37.5',
                 medNomLabel: 'Nom du médicament *',
                 medNomPlaceholder: 'Ex : Doliprane, Advil...',
                 medDoseLabel: 'Dose / quantité',
@@ -285,17 +355,22 @@
                 saveBtn: '💾 Enregistrer',
                 updateBtn: '✅ Mettre à jour',
                 cancelBtn: 'Annuler la modification',
+                filterDate: 'Date:',
+                filterType: 'Type:',
+                filterAll: 'Tous',
                 historyTitle: '📋 Historique',
                 noEntries: 'Aucun événement pour le moment.',
                 editTitle: 'Modifier',
                 deleteTitle: 'Supprimer',
                 deleteConfirm: 'Supprimer cet événement ?',
+                exportBtn: '📥 Exporter les données',
                 badgeBiberon: '🍼 Biberon',
                 badgeRepas: '🍽️ Repas solide',
                 badgePipi: '💧 Pipi',
                 badgeCaca: '💩 Caca',
                 badgeSommeil: '😴 Sommeil',
                 badgeRdv: '📅 Rendez-vous',
+                badgeTemp: '🌡️ Température',
                 badgeBain: '🛁 Bain',
                 badgeMedicament: '💊 Médicament',
                 badgeAutre: '📝 Autre',
@@ -308,18 +383,26 @@
                         const duree = Math.round((new Date(end) - new Date(start)) / 3600000 * 10) / 10;
                         return `Endormi à ${new Date(start).toLocaleTimeString('fr', {hour:'2-digit', minute:'2-digit'})}, réveil à ${new Date(end).toLocaleTimeString('fr', {hour:'2-digit', minute:'2-digit'})} (${duree}h)`;
                     } else if (start) {
-                        return `Endormi à ${new Date(start).toLocaleTimeString('fr', {hour:'2-digit', minute:'2-digit'})}`;
+                        return `Endormi à ${new Date(start).toLocaleTimeString('fr', {hour:'2-digit', minute:'2-digit'})} (en cours)`;
                     } else {
                         return 'Détails du sommeil incomplets';
                     }
                 },
                 detailsRdv: (date, desc) => `${desc || 'Rendez-vous'} le ${new Date(date).toLocaleString('fr', {day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'})}`,
+                detailsTemp: (val, lang) => {
+                    if (!val && val !== '0') return '';
+                    const c = parseFloat(val);
+                    if (lang === 'en') return ((c * 9/5 + 32).toFixed(1)) + ' °F';
+                    return c + ' °C';
+                },
                 detailsBain: 'Bain',
                 detailsMedicament: (nom, dose) => `<strong>${nom || 'Médicament'}</strong>${dose ? ' – ' + dose : ''}`,
                 detailsAutre: 'Événement divers'
             },
             en: {
                 subtitle: "Noah's daily tracking",
+                dailySummary: 'Today: {summary}',
+                none: 'no events',
                 statusLoading: 'Loading...',
                 statusCloud: '✅ Data loaded from cloud',
                 statusOffline: '⚠️ Offline mode (local data)',
@@ -339,6 +422,7 @@
                 caca: '💩 Poop',
                 sommeil: '😴 Sleep',
                 rdv: '📅 Appointment',
+                temp: '🌡️ Temperature',
                 bain: '🛁 Bath',
                 medicament: '💊 Medication',
                 autre: '📝 Other',
@@ -361,6 +445,8 @@
                 sleepEndLabel: 'Woke up at',
                 rdvDescLabel: 'Description (e.g. Pediatrician)',
                 rdvDateLabel: 'Appointment date *',
+                tempLabel: 'Temperature (°F)',
+                tempPlaceholder: 'E.g. 98.6',
                 medNomLabel: 'Medication name *',
                 medNomPlaceholder: 'E.g. Tylenol, Advil...',
                 medDoseLabel: 'Dose / amount',
@@ -370,17 +456,22 @@
                 saveBtn: '💾 Save',
                 updateBtn: '✅ Update',
                 cancelBtn: 'Cancel editing',
+                filterDate: 'Date:',
+                filterType: 'Type:',
+                filterAll: 'All',
                 historyTitle: '📋 History',
                 noEntries: 'No events yet.',
                 editTitle: 'Edit',
                 deleteTitle: 'Delete',
                 deleteConfirm: 'Delete this event?',
+                exportBtn: '📥 Export data',
                 badgeBiberon: '🍼 Bottle',
                 badgeRepas: '🍽️ Solid meal',
                 badgePipi: '💧 Pee',
                 badgeCaca: '💩 Poop',
                 badgeSommeil: '😴 Sleep',
                 badgeRdv: '📅 Appointment',
+                badgeTemp: '🌡️ Temperature',
                 badgeBain: '🛁 Bath',
                 badgeMedicament: '💊 Medication',
                 badgeAutre: '📝 Other',
@@ -393,12 +484,18 @@
                         const duree = Math.round((new Date(end) - new Date(start)) / 3600000 * 10) / 10;
                         return `Fell asleep at ${new Date(start).toLocaleTimeString('en', {hour:'2-digit', minute:'2-digit'})}, woke up at ${new Date(end).toLocaleTimeString('en', {hour:'2-digit', minute:'2-digit'})} (${duree}h)`;
                     } else if (start) {
-                        return `Fell asleep at ${new Date(start).toLocaleTimeString('en', {hour:'2-digit', minute:'2-digit'})}`;
+                        return `Fell asleep at ${new Date(start).toLocaleTimeString('en', {hour:'2-digit', minute:'2-digit'})} (in progress)`;
                     } else {
                         return 'Sleep details incomplete';
                     }
                 },
                 detailsRdv: (date, desc) => `${desc || 'Appointment'} on ${new Date(date).toLocaleString('en', {day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'})}`,
+                detailsTemp: (val, lang) => {
+                    if (!val && val !== '0') return '';
+                    const c = parseFloat(val);
+                    if (lang === 'en') return ((c * 9/5 + 32).toFixed(1)) + ' °F';
+                    return c + ' °C';
+                },
                 detailsBain: 'Bath',
                 detailsMedicament: (nom, dose) => `<strong>${nom || 'Medication'}</strong>${dose ? ' – ' + dose : ''}`,
                 detailsAutre: 'Other event'
@@ -406,12 +503,29 @@
         };
 
         let currentLang = localStorage.getItem('noahLang') || 'fr';
+        let currentTheme = localStorage.getItem('noahTheme') || 'dark';
         let entries = [];
         let editingId = null;
+        let filterDate = '';
+        let filterType = '';
+
+        // Appliquer le thème
+        function applyTheme(theme) {
+            if (theme === 'light') {
+                document.body.classList.add('light-mode');
+                document.getElementById('themeToggle').textContent = '🌙';
+            } else {
+                document.body.classList.remove('light-mode');
+                document.getElementById('themeToggle').textContent = '☀️';
+            }
+        }
+        applyTheme(currentTheme);
 
         // DOM elements
+        const themeToggle = document.getElementById('themeToggle');
         const langToggle = document.getElementById('langToggle');
         const subtitleEl = document.getElementById('subtitle');
+        const dailySummaryEl = document.getElementById('dailySummary');
         const statusDiv = document.getElementById('status');
         const appointmentAlert = document.getElementById('appointmentAlert');
         const form = document.getElementById('mainForm');
@@ -423,6 +537,11 @@
         const cancelButton = document.getElementById('cancelButton');
         const entryListDiv = document.getElementById('entryList');
         const historyTitleEl = document.getElementById('historyTitle');
+        const exportBtn = document.getElementById('exportBtn');
+        const filterDateInput = document.getElementById('filterDate');
+        const filterTypeSelect = document.getElementById('filterType');
+        const applyFilterBtn = document.getElementById('applyFilter');
+        const clearFilterBtn = document.getElementById('clearFilter');
 
         // Extra fields
         const fieldsBiberon = document.getElementById('fieldsBiberon');
@@ -430,6 +549,7 @@
         const fieldsCaca = document.getElementById('fieldsCaca');
         const fieldsSommeil = document.getElementById('fieldsSommeil');
         const fieldsRdv = document.getElementById('fieldsRdv');
+        const fieldsTemp = document.getElementById('fieldsTemp');
         const fieldsMedicament = document.getElementById('fieldsMedicament');
         const biberonQuantite = document.getElementById('biberonQuantite');
         const biberonType = document.getElementById('biberonType');
@@ -440,8 +560,24 @@
         const sleepEnd = document.getElementById('sleepEnd');
         const rdvDesc = document.getElementById('rdvDesc');
         const rdvDate = document.getElementById('rdvDate');
+        const tempValue = document.getElementById('tempValue');
         const medicamentNom = document.getElementById('medicamentNom');
         const medicamentDose = document.getElementById('medicamentDose');
+
+        // Toggle thème
+        themeToggle.addEventListener('click', () => {
+            currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            localStorage.setItem('noahTheme', currentTheme);
+            applyTheme(currentTheme);
+        });
+
+        // Conversion température
+        function cToF(celsius) {
+            return (parseFloat(celsius) * 9/5 + 32).toFixed(1);
+        }
+        function fToC(fahrenheit) {
+            return ((parseFloat(fahrenheit) - 32) * 5/9).toFixed(1);
+        }
 
         function applyLanguage(lang) {
             const t = translations[lang];
@@ -457,6 +593,7 @@
                 <option value="caca">${t.caca}</option>
                 <option value="sommeil">${t.sommeil}</option>
                 <option value="rdv">${t.rdv}</option>
+                <option value="temp">${t.temp}</option>
                 <option value="bain">${t.bain}</option>
                 <option value="medicament">${t.medicament}</option>
                 <option value="autre">${t.autre}</option>
@@ -483,6 +620,8 @@
             document.getElementById('lblRdvDesc').textContent = t.rdvDescLabel;
             rdvDesc.placeholder = t.rdvDescLabel;
             document.getElementById('lblRdvDate').textContent = t.rdvDateLabel;
+            document.getElementById('lblTempValue').textContent = t.tempLabel;
+            tempValue.placeholder = t.tempPlaceholder;
             document.getElementById('lblMedNom').textContent = t.medNomLabel;
             medicamentNom.placeholder = t.medNomPlaceholder;
             document.getElementById('lblMedDose').textContent = t.medDoseLabel;
@@ -492,10 +631,41 @@
             saveButton.textContent = t.saveBtn;
             cancelButton.textContent = t.cancelBtn;
             historyTitleEl.textContent = t.historyTitle;
+            exportBtn.textContent = t.exportBtn;
+            document.getElementById('lblFilterDate').textContent = t.filterDate;
+            document.getElementById('lblFilterType').textContent = t.filterType;
+            filterTypeSelect.innerHTML = `<option value="">${t.filterAll}</option>` +
+                ['biberon','repas','pipi','caca','sommeil','rdv','temp','bain','medicament','autre']
+                    .map(type => `<option value="${type}">${t[type] || type}</option>`).join('');
 
-            resetForm();
+            // Mettre à jour la température si on édite une entrée
+            if (editingId) {
+                const entry = entries.find(e => e.id === editingId);
+                if (entry && entry.type === 'temp' && entry.temp) {
+                    if (lang === 'en') {
+                        tempValue.value = cToF(entry.temp);
+                    } else {
+                        tempValue.value = entry.temp;
+                    }
+                } else {
+                    tempValue.value = '';
+                }
+            } else {
+                tempValue.value = '';
+            }
+
+            resetForm(); // remet à neuf les autres champs, mais remet editingId à null
+            if (editingId) {
+                // Réassigner editingId car resetForm l'a mis à null
+                editingId = entries.find(e => e.id === editingId)?.id || null;
+                if (editingId) {
+                    saveButton.textContent = t.updateBtn;
+                    cancelButton.style.display = 'inline-block';
+                }
+            }
             renderEntries();
             updateAppointmentAlert();
+            updateDailySummary();
             if (entries.length > 0) {
                 statusDiv.textContent = t.statusCloud;
             } else {
@@ -511,12 +681,11 @@
 
         function updateExtraFields() {
             const type = eventTypeSelect.value;
-            [fieldsBiberon, fieldsRepas, fieldsCaca, fieldsSommeil, fieldsRdv, fieldsMedicament]
+            [fieldsBiberon, fieldsRepas, fieldsCaca, fieldsSommeil, fieldsRdv, fieldsTemp, fieldsMedicament]
                 .forEach(el => el.classList.remove('active'));
             biberonQuantite.required = false;
             repasDescription.required = false;
             medicamentNom.required = false;
-            // Les champs sommeil/rdv ne sont pas required par défaut
 
             if (type === 'biberon') {
                 fieldsBiberon.classList.add('active');
@@ -531,6 +700,8 @@
             } else if (type === 'rdv') {
                 fieldsRdv.classList.add('active');
                 rdvDate.required = true;
+            } else if (type === 'temp') {
+                fieldsTemp.classList.add('active');
             } else if (type === 'medicament') {
                 fieldsMedicament.classList.add('active');
                 medicamentNom.required = true;
@@ -552,6 +723,7 @@
             sleepEnd.value = '';
             rdvDesc.value = '';
             rdvDate.value = '';
+            tempValue.value = '';
             medicamentNom.value = '';
             medicamentDose.value = '';
             updateExtraFields();
@@ -576,6 +748,12 @@
             rdvDate.value = entry.rdvDate || '';
             medicamentNom.value = entry.nom || '';
             medicamentDose.value = entry.dose || '';
+            // Température : convertir selon la langue
+            if (entry.type === 'temp' && entry.temp) {
+                tempValue.value = currentLang === 'en' ? cToF(entry.temp) : entry.temp;
+            } else {
+                tempValue.value = entry.temp || '';
+            }
             updateExtraFields();
             editingId = entry.id;
             saveButton.textContent = translations[currentLang].updateBtn;
@@ -587,7 +765,145 @@
             return Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
         }
 
-        // Vérifie les rendez-vous imminents
+        // Résumé du jour
+        function updateDailySummary() {
+            const t = translations[currentLang];
+            const today = new Date().toISOString().split('T')[0];
+            const todayEntries = entries.filter(e => e.date && e.date.startsWith(today));
+            if (todayEntries.length === 0) {
+                dailySummaryEl.textContent = t.dailySummary.replace('{summary}', t.none);
+                return;
+            }
+            const counts = {};
+            todayEntries.forEach(e => {
+                counts[e.type] = (counts[e.type] || 0) + 1;
+            });
+            const parts = Object.entries(counts).map(([type, count]) => {
+                const badgeKey = 'badge' + type.charAt(0).toUpperCase() + type.slice(1);
+                const badge = t[badgeKey] || type;
+                return `${count} ${badge}`;
+            });
+            dailySummaryEl.textContent = t.dailySummary.replace('{summary}', parts.join(', '));
+        }
+
+        // Filtrage
+        function getFilteredEntries() {
+            let filtered = entries;
+            if (filterDate) {
+                filtered = filtered.filter(e => e.date && e.date.startsWith(filterDate));
+            }
+            if (filterType) {
+                filtered = filtered.filter(e => e.type === filterType);
+            }
+            return filtered;
+        }
+
+        function renderEntries() {
+            const t = translations[currentLang];
+            const filtered = getFilteredEntries();
+            entryListDiv.innerHTML = '';
+            if (filtered.length === 0) {
+                entryListDiv.innerHTML = `<p>${t.noEntries}</p>`;
+                return;
+            }
+            const sorted = [...filtered].sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+            sorted.forEach(entry => {
+                const card = document.createElement('div');
+                card.className = 'entry-card';
+
+                let badgeHtml = '';
+                let details = '';
+                switch (entry.type) {
+                    case 'biberon':
+                        badgeHtml = `<span class="badge badge-biberon">${t.badgeBiberon}</span>`;
+                        details = t.detailsBiberon(entry.quantite, entry.description);
+                        break;
+                    case 'repas':
+                        badgeHtml = `<span class="badge badge-repas">${t.badgeRepas}</span>`;
+                        details = t.detailsRepas(entry.description, entry.quantite);
+                        break;
+                    case 'pipi':
+                        badgeHtml = `<span class="badge badge-pipi">${t.badgePipi}</span>`;
+                        details = t.detailsPipi;
+                        break;
+                    case 'caca':
+                        badgeHtml = `<span class="badge badge-caca">${t.badgeCaca}</span>`;
+                        details = t.detailsCaca(entry.consistance);
+                        break;
+                    case 'sommeil':
+                        badgeHtml = `<span class="badge badge-sommeil">${t.badgeSommeil}</span>`;
+                        details = t.detailsSommeil(entry.sleepStart, entry.sleepEnd);
+                        break;
+                    case 'rdv':
+                        badgeHtml = `<span class="badge badge-rdv">${t.badgeRdv}</span>`;
+                        details = t.detailsRdv(entry.rdvDate, entry.rdvDesc);
+                        break;
+                    case 'temp':
+                        badgeHtml = `<span class="badge badge-temp">${t.badgeTemp}</span>`;
+                        details = t.detailsTemp(entry.temp, currentLang);
+                        break;
+                    case 'bain':
+                        badgeHtml = `<span class="badge badge-bain">${t.badgeBain}</span>`;
+                        details = t.detailsBain;
+                        break;
+                    case 'medicament':
+                        badgeHtml = `<span class="badge badge-medicament">${t.badgeMedicament}</span>`;
+                        details = t.detailsMedicament(entry.nom, entry.dose);
+                        break;
+                    case 'autre':
+                        badgeHtml = `<span class="badge badge-autre">${t.badgeAutre}</span>`;
+                        details = t.detailsAutre;
+                        break;
+                }
+
+                const dateFormatted = new Date(entry.date).toLocaleString(currentLang === 'fr' ? 'fr-FR' : 'en-US', {
+                    day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
+                });
+
+                card.innerHTML = `
+                    <div class="actions">
+                        <button class="edit-btn" title="${t.editTitle}">✏️</button>
+                        <button class="delete-btn" title="${t.deleteTitle}">🗑️</button>
+                    </div>
+                    <div style="margin-bottom:0.3rem;">${badgeHtml} <small>${dateFormatted}</small></div>
+                    <div>${details}</div>
+                    ${entry.notes ? '<div style="font-style:italic; margin-top:0.3rem;">' + entry.notes + '</div>' : ''}
+                `;
+                card.querySelector('.edit-btn').addEventListener('click', () => editEntry(entry));
+                card.querySelector('.delete-btn').addEventListener('click', () => deleteEntry(entry.id));
+                entryListDiv.appendChild(card);
+            });
+        }
+
+        // Filtres
+        applyFilterBtn.addEventListener('click', () => {
+            filterDate = filterDateInput.value;
+            filterType = filterTypeSelect.value;
+            renderEntries();
+        });
+        clearFilterBtn.addEventListener('click', () => {
+            filterDateInput.value = '';
+            filterTypeSelect.value = '';
+            filterDate = '';
+            filterType = '';
+            renderEntries();
+        });
+
+        // Export JSON
+        exportBtn.addEventListener('click', () => {
+            const dataStr = JSON.stringify(entries, null, 2);
+            const blob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'noah-data.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        });
+
+        // RDV alert
         function updateAppointmentAlert() {
             const t = translations[currentLang];
             const now = new Date();
@@ -598,7 +914,7 @@
                     if (rdvTime > now) {
                         const diffDays = Math.ceil((rdvTime - now) / (1000 * 60 * 60 * 24));
                         if (diffDays <= 3 && (!closest || diffDays < closest.days)) {
-                            closest = { days: diffDays, desc: entry.rdvDesc || '', date: rdvTime };
+                            closest = { days: diffDays, desc: entry.rdvDesc || '' };
                         }
                     }
                 }
@@ -645,6 +961,7 @@
             }
             renderEntries();
             updateAppointmentAlert();
+            updateDailySummary();
         }
 
         async function saveData() {
@@ -669,78 +986,7 @@
                 statusDiv.textContent = message + '\n' + t.statusSavedLocal;
             }
             updateAppointmentAlert();
-        }
-
-        function renderEntries() {
-            const t = translations[currentLang];
-            entryListDiv.innerHTML = '';
-            if (entries.length === 0) {
-                entryListDiv.innerHTML = `<p>${t.noEntries}</p>`;
-                return;
-            }
-            const sorted = [...entries].sort((a, b) => (b.date || '').localeCompare(a.date || ''));
-            sorted.forEach(entry => {
-                const card = document.createElement('div');
-                card.className = 'entry-card';
-
-                let badgeHtml = '';
-                let details = '';
-                switch (entry.type) {
-                    case 'biberon':
-                        badgeHtml = `<span class="badge badge-biberon">${t.badgeBiberon}</span>`;
-                        details = t.detailsBiberon(entry.quantite, entry.description);
-                        break;
-                    case 'repas':
-                        badgeHtml = `<span class="badge badge-repas">${t.badgeRepas}</span>`;
-                        details = t.detailsRepas(entry.description, entry.quantite);
-                        break;
-                    case 'pipi':
-                        badgeHtml = `<span class="badge badge-pipi">${t.badgePipi}</span>`;
-                        details = t.detailsPipi;
-                        break;
-                    case 'caca':
-                        badgeHtml = `<span class="badge badge-caca">${t.badgeCaca}</span>`;
-                        details = t.detailsCaca(entry.consistance);
-                        break;
-                    case 'sommeil':
-                        badgeHtml = `<span class="badge badge-sommeil">${t.badgeSommeil}</span>`;
-                        details = t.detailsSommeil(entry.sleepStart, entry.sleepEnd);
-                        break;
-                    case 'rdv':
-                        badgeHtml = `<span class="badge badge-rdv">${t.badgeRdv}</span>`;
-                        details = t.detailsRdv(entry.rdvDate, entry.rdvDesc);
-                        break;
-                    case 'bain':
-                        badgeHtml = `<span class="badge badge-bain">${t.badgeBain}</span>`;
-                        details = t.detailsBain;
-                        break;
-                    case 'medicament':
-                        badgeHtml = `<span class="badge badge-medicament">${t.badgeMedicament}</span>`;
-                        details = t.detailsMedicament(entry.nom, entry.dose);
-                        break;
-                    case 'autre':
-                        badgeHtml = `<span class="badge badge-autre">${t.badgeAutre}</span>`;
-                        details = t.detailsAutre;
-                        break;
-                }
-
-                const dateFormatted = new Date(entry.date).toLocaleString(currentLang === 'fr' ? 'fr-FR' : 'en-US', {
-                    day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
-                });
-
-                card.innerHTML = `
-                    <div class="actions">
-                        <button class="edit-btn" title="${t.editTitle}">✏️</button>
-                        <button class="delete-btn" title="${t.deleteTitle}">🗑️</button>
-                    </div>
-                    <div style="margin-bottom:0.3rem;">${badgeHtml} <small>${dateFormatted}</small></div>
-                    <div>${details}</div>
-                    ${entry.notes ? '<div style="font-style:italic; margin-top:0.3rem;">' + entry.notes + '</div>' : ''}
-                `;
-                card.querySelector('.edit-btn').addEventListener('click', () => editEntry(entry));
-                card.querySelector('.delete-btn').addEventListener('click', () => deleteEntry(entry.id));
-                entryListDiv.appendChild(card);
-            });
+            updateDailySummary();
         }
 
         async function deleteEntry(id) {
@@ -779,6 +1025,17 @@
             } else if (type === 'rdv') {
                 newEntry.rdvDesc = rdvDesc.value.trim();
                 newEntry.rdvDate = rdvDate.value;
+            } else if (type === 'temp') {
+                let tempValueStr = tempValue.value.trim();
+                if (tempValueStr !== '') {
+                    if (currentLang === 'en') {
+                        newEntry.temp = fToC(tempValueStr);
+                    } else {
+                        newEntry.temp = tempValueStr;
+                    }
+                } else {
+                    newEntry.temp = '';
+                }
             } else if (type === 'medicament') {
                 newEntry.nom = medicamentNom.value.trim();
                 newEntry.dose = medicamentDose.value.trim();
