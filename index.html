@@ -870,32 +870,46 @@
             dailySummaryEl.textContent = t.dailySummary.replace('{summary}', parts.join(', '));
         }
 
-        // Alerte médicament (Doliprane/Tylenol)
+             // Alerte médicament (Doliprane 6h, Tylenol 4h)
         function updateMedicationAlert() {
             const t = translations[currentLang];
             const now = new Date();
             let latestMed = null;
+            let thresholdHours = 0; // sera défini selon le médicament
+
             for (const entry of entries) {
                 if (entry.type === 'medicament' && entry.nom) {
                     const nameLower = entry.nom.toLowerCase();
-                    if (nameLower.includes('doliprane') || nameLower.includes('tylenol')) {
-                        const medDate = new Date(entry.date);
-                        if (medDate <= now && (!latestMed || medDate > new Date(latestMed.date))) {
-                            latestMed = entry;
-                        }
+                    // Déterminer le seuil selon le médicament
+                    let currentThreshold = 0;
+                    if (nameLower.includes('tylenol')) {
+                        currentThreshold = 4; // 4 heures pour Tylenol
+                    } else if (nameLower.includes('doliprane')) {
+                        currentThreshold = 6; // 6 heures pour Doliprane
+                    }
+                    // Si ce n'est ni Tylenol ni Doliprane, on ignore
+                    if (currentThreshold === 0) continue;
+
+                    const medDate = new Date(entry.date);
+                    if (medDate <= now && (!latestMed || medDate > new Date(latestMed.date))) {
+                        latestMed = entry;
+                        thresholdHours = currentThreshold;
                     }
                 }
             }
+
             if (!latestMed) {
                 medicationAlert.style.display = 'none';
                 return;
             }
+
             const elapsedMs = now - new Date(latestMed.date);
             const elapsedHours = Math.floor(elapsedMs / 3600000);
             const elapsedMinutes = Math.floor((elapsedMs % 3600000) / 60000);
-            const sixHoursMs = 6 * 3600000;
-            if (elapsedMs < sixHoursMs) {
-                const remainingMs = sixHoursMs - elapsedMs;
+            const thresholdMs = thresholdHours * 3600000;
+
+            if (elapsedMs < thresholdMs) {
+                const remainingMs = thresholdMs - elapsedMs;
                 const remainingHours = Math.floor(remainingMs / 3600000);
                 const remainingMinutes = Math.floor((remainingMs % 3600000) / 60000);
                 medicationAlert.style.display = 'block';
