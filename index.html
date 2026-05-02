@@ -310,41 +310,41 @@
         const translations = {
             fr: {
                 subtitle: 'Suivi quotidien de Noah',
-                dailySummary: 'Aujourd’hui : {summary}',
-                none: 'aucun événement',
+                dailySummary: 'Aujourd\u2019hui : {summary}',
+                none: 'aucun \u00e9v\u00e9nement',
                 statusLoading: 'Chargement en cours...',
-                statusCloud: '✅ Données chargées depuis le cloud',
-                statusOffline: '⚠️ Mode hors ligne (données locales)',
-                statusEmpty: '⚠️ Aucune donnée, démarrage à vide',
-                statusSavedCloud: '✅ Synchronisé avec le cloud',
-                statusSavedLocal: '⚠️ Données enregistrées localement (connexion indisponible)',
-                errorNetwork: '❌ Erreur réseau : impossible de joindre le serveur.',
-                errorAuth: '❌ Accès refusé (authentification). Vérifie le secret Firebase.',
-                errorServer: '❌ Erreur serveur Firebase.',
-                errorFormat: '❌ Les données ne sont pas un tableau valide.',
-                appointmentSoon: '⚠️ Prochain RDV dans {days} jour(s) : {desc}',
-                medicationRecent: '⚠️ {name} pris il y a {h}h{min}. Attendre encore {remaining}h{remainingMin} avant la prochaine dose.',
-                eventTypeLabel: "Type d'événement *",
+                statusCloud: '\u2705 Donn\u00e9es charg\u00e9es depuis le cloud',
+                statusOffline: '\u26a0\ufe0f Mode hors ligne (donn\u00e9es locales)',
+                statusEmpty: '\u26a0\ufe0f Aucune donn\u00e9e, d\u00e9marrage \u00e0 vide',
+                statusSavedCloud: '\u2705 Synchronis\u00e9 avec le cloud',
+                statusSavedLocal: '\u26a0\ufe0f Donn\u00e9es enregistr\u00e9es localement (connexion indisponible)',
+                errorNetwork: '\u274c Erreur r\u00e9seau : impossible de joindre le serveur.',
+                errorAuth: '\u274c Acc\u00e8s refus\u00e9 (authentification). V\u00e9rifie le secret Firebase.',
+                errorServer: '\u274c Erreur serveur Firebase.',
+                errorFormat: '\u274c Les donn\u00e9es ne sont pas un tableau valide.',
+                appointmentSoon: '\u26a0\ufe0f Prochain RDV dans {days} jour(s) : {desc}',
+                medicationRecent: '\u26a0\ufe0f {name} pris il y a {h}h{min}. Attendre encore {remaining}h{remainingMin} avant la prochaine dose.',
+                eventTypeLabel: "Type d'\u00e9v\u00e9nement *",
                 choose: '-- Choisis --',
-                biberon: '🍼 Biberon',
-                repas: '🍽️ Repas solide',
-                pipi: '💧 Pipi',
-                caca: '💩 Caca',
-                sommeil: '😴 Sommeil',
-                rdv: '📅 Rendez-vous',
-                temp: '🌡️ Température',
-                mesures: '📏 Mesures (poids/taille)',
-                bain: '🛁 Bain',
-                medicament: '💊 Médicament',
-                autre: '📝 Autre',
+                biberon: '\ud83c\udf7c Biberon',
+                repas: '\ud83c\udf7d\ufe0f Repas solide',
+                pipi: '\ud83d\udca7 Pipi',
+                caca: '\ud83d\udca9 Caca',
+                sommeil: '\ud83d\ude34 Sommeil',
+                rdv: '\ud83d\udcc5 Rendez-vous',
+                temp: '\ud83c\udf21\ufe0f Temp\u00e9rature',
+                mesures: '\ud83d\udccf Mesures (poids/taille)',
+                bain: '\ud83d\udec1 Bain',
+                medicament: '\ud83d\udc8a M\u00e9dicament',
+                autre: '\ud83d\udcdd Autre',
                 dateLabel: 'Date et heure *',
-                bibQtyLabel: 'Quantité (ml) *',
+                bibQtyLabel: 'Quantit\u00e9 (ml) *',
                 bibQtyPlaceholder: 'Ex : 180',
                 bibTypeLabel: 'Type de lait / remarque',
                 bibTypePlaceholder: 'Ex : lait infantile, lait maternel...',
                 repasDescLabel: 'Aliment(s) *',
-                repasDescPlaceholder: 'Ex : purée de carottes, compote...',
-                repasQtyLabel: 'Quantité',
+                repasDescPlaceholder: 'Ex : pur\u00e9e de carottes, compote...',
+                repasQtyLabel: 'Quantit\u00e9',
                 repasQtyPlaceholder: 'Ex : 100g, un petit pot...',
                 consistanceCacaLabel: 'Consistance (optionnelle)',
                 consistanceChoose: '-- Indique si besoin --',
@@ -353,64 +353,69 @@
                 solides: 'Solides',
                 dures: 'Dures',
                 sleepStartLabel: 'Heure d\'endormissement',
-                sleepEndLabel: 'Heure de réveil',
-                rdvDescLabel: 'Description (ex: Pédiatre)',
+                sleepEndLabel: 'Heure de r\u00e9veil',
+                rdvDescLabel: 'Description (ex: P\u00e9diatre)',
                 rdvDateLabel: 'Date du rendez-vous *',
-                tempLabel: 'Température (°C)',
+                tempLabel: 'Temp\u00e9rature (\u00b0C)',
                 tempPlaceholder: 'Ex: 37.5',
                 poidsLabel: 'Poids (kg)',
                 poidsPlaceholder: 'Ex: 8.5',
                 tailleLabel: 'Taille (cm)',
                 taillePlaceholder: 'Ex: 72',
-                medNomLabel: 'Nom du médicament *',
-                medNomPlaceholder: 'Ex : Doliprane, Advil...',
-                medDoseLabel: 'Dose / quantité',
+                medNomLabel: 'Nom du m\u00e9dicament *',
+                medNomPlaceholder: 'Ex : Doliprane, Motrin, Tylenol...',
+                medDoseLabel: 'Dose / quantit\u00e9',
                 medDosePlaceholder: 'Ex : 2.5 ml, un suppo...',
                 notesLabel: 'Notes (commentaire libre)',
                 notesPlaceholder: 'Tout ce que tu veux ajouter...',
-                saveBtn: '💾 Enregistrer',
-                updateBtn: '✅ Mettre à jour',
+                saveBtn: '\ud83d\udcbe Enregistrer',
+                updateBtn: '\u2705 Mettre \u00e0 jour',
                 cancelBtn: 'Annuler la modification',
                 filterDate: 'Date:',
                 filterType: 'Type:',
                 filterAll: 'Tous',
-                historyTitle: '📋 Historique',
-                noEntries: 'Aucun événement pour le moment.',
+                historyTitle: '\ud83d\udccb Historique',
+                noEntries: 'Aucun \u00e9v\u00e9nement pour le moment.',
                 editTitle: 'Modifier',
                 deleteTitle: 'Supprimer',
-                deleteConfirm: 'Supprimer cet événement ?',
-                exportBtn: '📥 Exporter les données',
-                badgeBiberon: '🍼 Biberon',
-                badgeRepas: '🍽️ Repas solide',
-                badgePipi: '💧 Pipi',
-                badgeCaca: '💩 Caca',
-                badgeSommeil: '😴 Sommeil',
-                badgeRdv: '📅 Rendez-vous',
-                badgeTemp: '🌡️ Température',
-                badgeMesures: '📏 Mesures',
-                badgeBain: '🛁 Bain',
-                badgeMedicament: '💊 Médicament',
-                badgeAutre: '📝 Autre',
-                detailsBiberon: (qty, desc) => `<strong>${qty || '?'} ml</strong>${desc ? ' – ' + desc : ''}`,
-                detailsRepas: (desc, qty) => `<strong>${desc || 'Repas'}</strong>${qty ? ' – ' + qty : ''}`,
+                deleteConfirm: 'Supprimer cet \u00e9v\u00e9nement ?',
+                exportBtn: '\ud83d\udce5 Exporter les donn\u00e9es',
+                badgeBiberon: '\ud83c\udf7c Biberon',
+                badgeRepas: '\ud83c\udf7d\ufe0f Repas solide',
+                badgePipi: '\ud83d\udca7 Pipi',
+                badgeCaca: '\ud83d\udca9 Caca',
+                badgeSommeil: '\ud83d\ude34 Sommeil',
+                badgeRdv: '\ud83d\udcc5 Rendez-vous',
+                badgeTemp: '\ud83c\udf21\ufe0f Temp\u00e9rature',
+                badgeMesures: '\ud83d\udccf Mesures',
+                badgeBain: '\ud83d\udec1 Bain',
+                badgeMedicament: '\ud83d\udc8a M\u00e9dicament',
+                badgeAutre: '\ud83d\udcdd Autre',
+                detailsBiberon: (qty, desc) => `<strong>${qty || '?'} ml</strong>${desc ? ' \u2013 ' + desc : ''}`,
+                detailsRepas: (desc, qty) => `<strong>${desc || 'Repas'}</strong>${qty ? ' \u2013 ' + qty : ''}`,
                 detailsPipi: 'Pipi',
                 detailsCaca: (consistance) => consistance ? `Caca (${consistance})` : 'Caca',
                 detailsSommeil: (start, end) => {
                     if (start && end) {
-                        const duree = Math.round((new Date(end) - new Date(start)) / 3600000 * 10) / 10;
-                        return `Endormi à ${new Date(start).toLocaleTimeString('fr', {hour:'2-digit', minute:'2-digit'})}, réveil à ${new Date(end).toLocaleTimeString('fr', {hour:'2-digit', minute:'2-digit'})} (${duree}h)`;
+                        const startDate = new Date(start);
+                        const endDate = new Date(end);
+                        if (start.length <= 16 && end.length <= 16) {
+                            endDate.setFullYear(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
+                        }
+                        const duree = Math.round((endDate - startDate) / 3600000 * 10) / 10;
+                        return `Endormi \u00e0 ${startDate.toLocaleTimeString('fr', {hour:'2-digit', minute:'2-digit'})}, r\u00e9veil \u00e0 ${endDate.toLocaleTimeString('fr', {hour:'2-digit', minute:'2-digit'})} (${duree}h)`;
                     } else if (start) {
-                        return `Endormi à ${new Date(start).toLocaleTimeString('fr', {hour:'2-digit', minute:'2-digit'})} (en cours)`;
+                        return `Endormi \u00e0 ${new Date(start).toLocaleTimeString('fr', {hour:'2-digit', minute:'2-digit'})} (en cours)`;
                     } else {
-                        return 'Détails du sommeil incomplets';
+                        return 'D\u00e9tails du sommeil incomplets';
                     }
                 },
                 detailsRdv: (date, desc) => `${desc || 'Rendez-vous'} le ${new Date(date).toLocaleString('fr', {day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'})}`,
                 detailsTemp: (val, lang) => {
                     if (!val && val !== '0') return '';
                     const c = parseFloat(val);
-                    if (lang === 'en') return ((c * 9/5 + 32).toFixed(1)) + ' °F';
-                    return c + ' °C';
+                    if (lang === 'en') return ((c * 9/5 + 32).toFixed(1)) + ' \u00b0F';
+                    return c + ' \u00b0C';
                 },
                 detailsMesures: (poids, taille, lang) => {
                     const parts = [];
@@ -425,41 +430,41 @@
                     return parts.join(' / ') || 'Mesures';
                 },
                 detailsBain: 'Bain',
-                detailsMedicament: (nom, dose) => `<strong>${nom || 'Médicament'}</strong>${dose ? ' – ' + dose : ''}`,
-                detailsAutre: 'Événement divers'
+                detailsMedicament: (nom, dose) => `<strong>${nom || 'M\u00e9dicament'}</strong>${dose ? ' \u2013 ' + dose : ''}`,
+                detailsAutre: '\u00c9v\u00e9nement divers'
             },
             en: {
                 subtitle: "Noah's daily tracking",
                 dailySummary: 'Today: {summary}',
                 none: 'no events',
                 statusLoading: 'Loading...',
-                statusCloud: '✅ Data loaded from cloud',
-                statusOffline: '⚠️ Offline mode (local data)',
-                statusEmpty: '⚠️ No data, starting empty',
-                statusSavedCloud: '✅ Synced with cloud',
-                statusSavedLocal: '⚠️ Data saved locally (no connection)',
-                errorNetwork: '❌ Network error: Cannot reach server.',
-                errorAuth: '❌ Access denied (auth). Check Firebase secret.',
-                errorServer: '❌ Firebase server error.',
-                errorFormat: '❌ Data is not a valid array.',
-                appointmentSoon: '⚠️ Upcoming appointment in {days} day(s): {desc}',
-                medicationRecent: '⚠️ {name} taken {h}h{min} ago. Wait {remaining}h{remainingMin} before next dose.',
+                statusCloud: '\u2705 Data loaded from cloud',
+                statusOffline: '\u26a0\ufe0f Offline mode (local data)',
+                statusEmpty: '\u26a0\ufe0f No data, starting empty',
+                statusSavedCloud: '\u2705 Synced with cloud',
+                statusSavedLocal: '\u26a0\ufe0f Data saved locally (no connection)',
+                errorNetwork: '\u274c Network error: Cannot reach server.',
+                errorAuth: '\u274c Access denied (auth). Check Firebase secret.',
+                errorServer: '\u274c Firebase server error.',
+                errorFormat: '\u274c Data is not a valid array.',
+                appointmentSoon: '\u26a0\ufe0f Upcoming appointment in {days} day(s): {desc}',
+                medicationRecent: '\u26a0\ufe0f {name} taken {h}h{min} ago. Wait {remaining}h{remainingMin} before next dose.',
                 eventTypeLabel: 'Event type *',
                 choose: '-- Choose --',
-                biberon: '🍼 Bottle',
-                repas: '🍽️ Solid meal',
-                pipi: '💧 Pee',
-                caca: '💩 Poop',
-                sommeil: '😴 Sleep',
-                rdv: '📅 Appointment',
-                temp: '🌡️ Temperature',
-                mesures: '📏 Measurements (weight/height)',
-                bain: '🛁 Bath',
-                medicament: '💊 Medication',
-                autre: '📝 Other',
+                biberon: '\ud83c\udf7c Bottle',
+                repas: '\ud83c\udf7d\ufe0f Solid meal',
+                pipi: '\ud83d\udca7 Pee',
+                caca: '\ud83d\udca9 Poop',
+                sommeil: '\ud83d\ude34 Sleep',
+                rdv: '\ud83d\udcc5 Appointment',
+                temp: '\ud83c\udf21\ufe0f Temperature',
+                mesures: '\ud83d\udccf Measurements (weight/height)',
+                bain: '\ud83d\udec1 Bath',
+                medicament: '\ud83d\udc8a Medication',
+                autre: '\ud83d\udcdd Other',
                 dateLabel: 'Date and time *',
-                bibQtyLabel: 'Quantity (ml) *',
-                bibQtyPlaceholder: 'E.g. 180',
+                bibQtyLabel: 'Quantity (fl oz) *',
+                bibQtyPlaceholder: 'E.g. 6.1',
                 bibTypeLabel: 'Milk type / note',
                 bibTypePlaceholder: 'E.g. formula, breast milk...',
                 repasDescLabel: 'Food(s) *',
@@ -476,49 +481,58 @@
                 sleepEndLabel: 'Woke up at',
                 rdvDescLabel: 'Description (e.g. Pediatrician)',
                 rdvDateLabel: 'Appointment date *',
-                tempLabel: 'Temperature (°F)',
+                tempLabel: 'Temperature (\u00b0F)',
                 tempPlaceholder: 'E.g. 98.6',
                 poidsLabel: 'Weight (lb)',
                 poidsPlaceholder: 'E.g. 18.7',
                 tailleLabel: 'Height (in)',
                 taillePlaceholder: 'E.g. 28.3',
                 medNomLabel: 'Medication name *',
-                medNomPlaceholder: 'E.g. Tylenol, Advil...',
+                medNomPlaceholder: 'E.g. Tylenol, Motrin, Advil...',
                 medDoseLabel: 'Dose / amount',
                 medDosePlaceholder: 'E.g. 2.5 ml, one suppository...',
                 notesLabel: 'Notes (free comment)',
                 notesPlaceholder: 'Anything you want to add...',
-                saveBtn: '💾 Save',
-                updateBtn: '✅ Update',
+                saveBtn: '\ud83d\udcbe Save',
+                updateBtn: '\u2705 Update',
                 cancelBtn: 'Cancel editing',
                 filterDate: 'Date:',
                 filterType: 'Type:',
                 filterAll: 'All',
-                historyTitle: '📋 History',
+                historyTitle: '\ud83d\udccb History',
                 noEntries: 'No events yet.',
                 editTitle: 'Edit',
                 deleteTitle: 'Delete',
                 deleteConfirm: 'Delete this event?',
-                exportBtn: '📥 Export data',
-                badgeBiberon: '🍼 Bottle',
-                badgeRepas: '🍽️ Solid meal',
-                badgePipi: '💧 Pee',
-                badgeCaca: '💩 Poop',
-                badgeSommeil: '😴 Sleep',
-                badgeRdv: '📅 Appointment',
-                badgeTemp: '🌡️ Temperature',
-                badgeMesures: '📏 Measurements',
-                badgeBain: '🛁 Bath',
-                badgeMedicament: '💊 Medication',
-                badgeAutre: '📝 Other',
-                detailsBiberon: (qty, desc) => `<strong>${qty || '?'} ml</strong>${desc ? ' – ' + desc : ''}`,
-                detailsRepas: (desc, qty) => `<strong>${desc || 'Meal'}</strong>${qty ? ' – ' + qty : ''}`,
+                exportBtn: '\ud83d\udce5 Export data',
+                badgeBiberon: '\ud83c\udf7c Bottle',
+                badgeRepas: '\ud83c\udf7d\ufe0f Solid meal',
+                badgePipi: '\ud83d\udca7 Pee',
+                badgeCaca: '\ud83d\udca9 Poop',
+                badgeSommeil: '\ud83d\ude34 Sleep',
+                badgeRdv: '\ud83d\udcc5 Appointment',
+                badgeTemp: '\ud83c\udf21\ufe0f Temperature',
+                badgeMesures: '\ud83d\udccf Measurements',
+                badgeBain: '\ud83d\udec1 Bath',
+                badgeMedicament: '\ud83d\udc8a Medication',
+                badgeAutre: '\ud83d\udcdd Other',
+                detailsBiberon: (qty, desc) => {
+                    const ml = parseFloat(qty);
+                    const display = ml ? (ml / 29.5735).toFixed(1) + ' fl oz' : (qty || '?');
+                    return `<strong>${display}</strong>${desc ? ' \u2013 ' + desc : ''}`;
+                },
+                detailsRepas: (desc, qty) => `<strong>${desc || 'Meal'}</strong>${qty ? ' \u2013 ' + qty : ''}`,
                 detailsPipi: 'Pee',
                 detailsCaca: (consistance) => consistance ? `Poop (${consistance})` : 'Poop',
                 detailsSommeil: (start, end) => {
                     if (start && end) {
-                        const duree = Math.round((new Date(end) - new Date(start)) / 3600000 * 10) / 10;
-                        return `Fell asleep at ${new Date(start).toLocaleTimeString('en', {hour:'2-digit', minute:'2-digit'})}, woke up at ${new Date(end).toLocaleTimeString('en', {hour:'2-digit', minute:'2-digit'})} (${duree}h)`;
+                        const startDate = new Date(start);
+                        const endDate = new Date(end);
+                        if (start.length <= 16 && end.length <= 16) {
+                            endDate.setFullYear(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
+                        }
+                        const duree = Math.round((endDate - startDate) / 3600000 * 10) / 10;
+                        return `Fell asleep at ${startDate.toLocaleTimeString('en', {hour:'2-digit', minute:'2-digit'})}, woke up at ${endDate.toLocaleTimeString('en', {hour:'2-digit', minute:'2-digit'})} (${duree}h)`;
                     } else if (start) {
                         return `Fell asleep at ${new Date(start).toLocaleTimeString('en', {hour:'2-digit', minute:'2-digit'})} (in progress)`;
                     } else {
@@ -529,8 +543,8 @@
                 detailsTemp: (val, lang) => {
                     if (!val && val !== '0') return '';
                     const c = parseFloat(val);
-                    if (lang === 'en') return ((c * 9/5 + 32).toFixed(1)) + ' °F';
-                    return c + ' °C';
+                    if (lang === 'en') return ((c * 9/5 + 32).toFixed(1)) + ' \u00b0F';
+                    return c + ' \u00b0C';
                 },
                 detailsMesures: (poids, taille, lang) => {
                     const parts = [];
@@ -545,7 +559,7 @@
                     return parts.join(' / ') || 'Measurements';
                 },
                 detailsBain: 'Bath',
-                detailsMedicament: (nom, dose) => `<strong>${nom || 'Medication'}</strong>${dose ? ' – ' + dose : ''}`,
+                detailsMedicament: (nom, dose) => `<strong>${nom || 'Medication'}</strong>${dose ? ' \u2013 ' + dose : ''}`,
                 detailsAutre: 'Other event'
             }
         };
@@ -558,19 +572,17 @@
         let filterType = '';
         let medicationTimerInterval = null;
 
-        // Appliquer le thème
         function applyTheme(theme) {
             if (theme === 'light') {
                 document.body.classList.add('light-mode');
-                document.getElementById('themeToggle').textContent = '🌙';
+                document.getElementById('themeToggle').textContent = '\ud83c\udf19';
             } else {
                 document.body.classList.remove('light-mode');
-                document.getElementById('themeToggle').textContent = '☀️';
+                document.getElementById('themeToggle').textContent = '\u2600\ufe0f';
             }
         }
         applyTheme(currentTheme);
 
-        // DOM elements
         const themeToggle = document.getElementById('themeToggle');
         const langToggle = document.getElementById('langToggle');
         const subtitleEl = document.getElementById('subtitle');
@@ -593,7 +605,6 @@
         const applyFilterBtn = document.getElementById('applyFilter');
         const clearFilterBtn = document.getElementById('clearFilter');
 
-        // Extra fields
         const fieldsBiberon = document.getElementById('fieldsBiberon');
         const fieldsRepas = document.getElementById('fieldsRepas');
         const fieldsCaca = document.getElementById('fieldsCaca');
@@ -617,32 +628,20 @@
         const medicamentNom = document.getElementById('medicamentNom');
         const medicamentDose = document.getElementById('medicamentDose');
 
-        // Toggle thème
         themeToggle.addEventListener('click', () => {
             currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
             localStorage.setItem('noahTheme', currentTheme);
             applyTheme(currentTheme);
         });
 
-        // Conversions
-        function cToF(celsius) {
-            return (parseFloat(celsius) * 9/5 + 32).toFixed(1);
-        }
-        function fToC(fahrenheit) {
-            return ((parseFloat(fahrenheit) - 32) * 5/9).toFixed(1);
-        }
-        function kgToLb(kg) {
-            return (parseFloat(kg) * 2.20462).toFixed(1);
-        }
-        function lbToKg(lb) {
-            return (parseFloat(lb) / 2.20462).toFixed(1);
-        }
-        function cmToIn(cm) {
-            return (parseFloat(cm) / 2.54).toFixed(1);
-        }
-        function inToCm(inches) {
-            return (parseFloat(inches) * 2.54).toFixed(1);
-        }
+        function cToF(celsius) { return (parseFloat(celsius) * 9/5 + 32).toFixed(1); }
+        function fToC(fahrenheit) { return ((parseFloat(fahrenheit) - 32) * 5/9).toFixed(1); }
+        function kgToLb(kg) { return (parseFloat(kg) * 2.20462).toFixed(1); }
+        function lbToKg(lb) { return (parseFloat(lb) / 2.20462).toFixed(1); }
+        function cmToIn(cm) { return (parseFloat(cm) / 2.54).toFixed(1); }
+        function inToCm(inches) { return (parseFloat(inches) * 2.54).toFixed(1); }
+        function mlToFlOz(ml) { return (parseFloat(ml) / 29.5735).toFixed(1); }
+        function flOzToMl(flOz) { return (parseFloat(flOz) * 29.5735).toFixed(0); }
 
         function applyLanguage(lang) {
             const t = translations[lang];
@@ -650,20 +649,9 @@
             subtitleEl.textContent = t.subtitle;
             langToggle.textContent = lang === 'fr' ? 'EN' : 'FR';
             document.getElementById('lblEventType').textContent = t.eventTypeLabel;
-            eventTypeSelect.innerHTML = `
-                <option value="">${t.choose}</option>
-                <option value="biberon">${t.biberon}</option>
-                <option value="repas">${t.repas}</option>
-                <option value="pipi">${t.pipi}</option>
-                <option value="caca">${t.caca}</option>
-                <option value="sommeil">${t.sommeil}</option>
-                <option value="rdv">${t.rdv}</option>
-                <option value="temp">${t.temp}</option>
-                <option value="mesures">${t.mesures}</option>
-                <option value="bain">${t.bain}</option>
-                <option value="medicament">${t.medicament}</option>
-                <option value="autre">${t.autre}</option>
-            `;
+            eventTypeSelect.innerHTML = `<option value="">${t.choose}</option>` +
+                ['biberon','repas','pipi','caca','sommeil','rdv','temp','mesures','bain','medicament','autre']
+                    .map(type => `<option value="${type}">${t[type]}</option>`).join('');
             document.getElementById('lblEventDate').textContent = t.dateLabel;
             document.getElementById('lblBibQty').textContent = t.bibQtyLabel;
             biberonQuantite.placeholder = t.bibQtyPlaceholder;
@@ -674,13 +662,9 @@
             document.getElementById('lblRepasQty').textContent = t.repasQtyLabel;
             repasQuantite.placeholder = t.repasQtyPlaceholder;
             document.getElementById('lblConsistanceCaca').textContent = t.consistanceCacaLabel;
-            cacaConsistance.innerHTML = `
-                <option value="">${t.consistanceChoose}</option>
-                <option value="liquide">${t.liquide}</option>
-                <option value="molles">${t.molles}</option>
-                <option value="solides">${t.solides}</option>
-                <option value="dures">${t.dures}</option>
-            `;
+            cacaConsistance.innerHTML = `<option value="">${t.consistanceChoose}</option>` +
+                ['liquide','molles','solides','dures']
+                    .map(opt => `<option value="${opt}">${t[opt]}</option>`).join('');
             document.getElementById('lblSleepStart').textContent = t.sleepStartLabel;
             document.getElementById('lblSleepEnd').textContent = t.sleepEndLabel;
             document.getElementById('lblRdvDesc').textContent = t.rdvDescLabel;
@@ -706,30 +690,35 @@
             document.getElementById('lblFilterType').textContent = t.filterType;
             filterTypeSelect.innerHTML = `<option value="">${t.filterAll}</option>` +
                 ['biberon','repas','pipi','caca','sommeil','rdv','temp','mesures','bain','medicament','autre']
-                    .map(type => `<option value="${type}">${t[type] || type}</option>`).join('');
+                    .map(type => `<option value="${type}">${t[type]}</option>`).join('');
 
-            // Convertir les champs en cours d'édition si nécessaire
             if (editingId) {
                 const entry = entries.find(e => e.id === editingId);
                 if (entry) {
+                    if (entry.type === 'biberon' && entry.quantite) {
+                        biberonQuantite.value = lang === 'en' ? mlToFlOz(entry.quantite) : entry.quantite;
+                    } else {
+                        biberonQuantite.value = entry?.quantite || '';
+                    }
                     if (entry.type === 'temp' && entry.temp) {
                         tempValue.value = lang === 'en' ? cToF(entry.temp) : entry.temp;
-                    } else tempValue.value = entry.temp || '';
+                    } else tempValue.value = entry?.temp || '';
                     if (entry.type === 'mesures') {
                         poidsValue.value = (entry.poids && lang === 'en') ? kgToLb(entry.poids) : (entry.poids || '');
                         tailleValue.value = (entry.taille && lang === 'en') ? cmToIn(entry.taille) : (entry.taille || '');
                     } else {
-                        poidsValue.value = entry.poids || '';
-                        tailleValue.value = entry.taille || '';
+                        poidsValue.value = entry?.poids || '';
+                        tailleValue.value = entry?.taille || '';
                     }
                 }
             } else {
+                biberonQuantite.value = '';
                 tempValue.value = '';
                 poidsValue.value = '';
                 tailleValue.value = '';
             }
 
-            resetForm(); // resetForm met editingId à null, on le restaure
+            resetForm();
             if (editingId) {
                 editingId = entries.find(e => e.id === editingId)?.id || null;
                 if (editingId) {
@@ -741,11 +730,7 @@
             updateAppointmentAlert();
             updateMedicationAlert();
             updateDailySummary();
-            if (entries.length > 0) {
-                statusDiv.textContent = t.statusCloud;
-            } else {
-                statusDiv.textContent = t.statusEmpty;
-            }
+            statusDiv.textContent = entries.length > 0 ? t.statusCloud : t.statusEmpty;
         }
 
         langToggle.addEventListener('click', () => {
@@ -761,28 +746,14 @@
             biberonQuantite.required = false;
             repasDescription.required = false;
             medicamentNom.required = false;
-
-            if (type === 'biberon') {
-                fieldsBiberon.classList.add('active');
-                biberonQuantite.required = true;
-            } else if (type === 'repas') {
-                fieldsRepas.classList.add('active');
-                repasDescription.required = true;
-            } else if (type === 'caca') {
-                fieldsCaca.classList.add('active');
-            } else if (type === 'sommeil') {
-                fieldsSommeil.classList.add('active');
-            } else if (type === 'rdv') {
-                fieldsRdv.classList.add('active');
-                rdvDate.required = true;
-            } else if (type === 'temp') {
-                fieldsTemp.classList.add('active');
-            } else if (type === 'mesures') {
-                fieldsMesures.classList.add('active');
-            } else if (type === 'medicament') {
-                fieldsMedicament.classList.add('active');
-                medicamentNom.required = true;
-            }
+            if (type === 'biberon') { fieldsBiberon.classList.add('active'); biberonQuantite.required = true; }
+            else if (type === 'repas') { fieldsRepas.classList.add('active'); repasDescription.required = true; }
+            else if (type === 'caca') { fieldsCaca.classList.add('active'); }
+            else if (type === 'sommeil') { fieldsSommeil.classList.add('active'); }
+            else if (type === 'rdv') { fieldsRdv.classList.add('active'); rdvDate.required = true; }
+            else if (type === 'temp') { fieldsTemp.classList.add('active'); }
+            else if (type === 'mesures') { fieldsMesures.classList.add('active'); }
+            else if (type === 'medicament') { fieldsMedicament.classList.add('active'); medicamentNom.required = true; }
         }
         eventTypeSelect.addEventListener('change', updateExtraFields);
 
@@ -816,7 +787,7 @@
             eventTypeSelect.value = entry.type;
             eventDateInput.value = entry.date || '';
             notesInput.value = entry.notes || '';
-            biberonQuantite.value = entry.quantite || '';
+            biberonQuantite.value = (entry.type === 'biberon' && currentLang === 'en') ? mlToFlOz(entry.quantite) : (entry.quantite || '');
             biberonType.value = entry.description || '';
             repasDescription.value = entry.description || '';
             repasQuantite.value = entry.quantite || '';
@@ -827,7 +798,6 @@
             rdvDate.value = entry.rdvDate || '';
             medicamentNom.value = entry.nom || '';
             medicamentDose.value = entry.dose || '';
-            // Température et mesures avec conversion
             if (entry.type === 'temp' && entry.temp) {
                 tempValue.value = currentLang === 'en' ? cToF(entry.temp) : entry.temp;
             } else tempValue.value = entry.temp || '';
@@ -849,7 +819,6 @@
             return Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
         }
 
-        // Résumé du jour
         function updateDailySummary() {
             const t = translations[currentLang];
             const today = new Date().toISOString().split('T')[0];
@@ -859,37 +828,26 @@
                 return;
             }
             const counts = {};
-            todayEntries.forEach(e => {
-                counts[e.type] = (counts[e.type] || 0) + 1;
-            });
+            todayEntries.forEach(e => { counts[e.type] = (counts[e.type] || 0) + 1; });
             const parts = Object.entries(counts).map(([type, count]) => {
                 const badgeKey = 'badge' + type.charAt(0).toUpperCase() + type.slice(1);
-                const badge = t[badgeKey] || type;
-                return `${count} ${badge}`;
+                return `${count} ${t[badgeKey] || type}`;
             });
             dailySummaryEl.textContent = t.dailySummary.replace('{summary}', parts.join(', '));
         }
 
-             // Alerte médicament (Doliprane 6h, Tylenol 4h)
         function updateMedicationAlert() {
             const t = translations[currentLang];
             const now = new Date();
             let latestMed = null;
-            let thresholdHours = 0; // sera défini selon le médicament
-
+            let thresholdHours = 0;
             for (const entry of entries) {
                 if (entry.type === 'medicament' && entry.nom) {
                     const nameLower = entry.nom.toLowerCase();
-                    // Déterminer le seuil selon le médicament
                     let currentThreshold = 0;
-                    if (nameLower.includes('tylenol')) {
-                        currentThreshold = 4; // 4 heures pour Tylenol
-                    } else if (nameLower.includes('doliprane')) {
-                        currentThreshold = 6; // 6 heures pour Doliprane
-                    }
-                    // Si ce n'est ni Tylenol ni Doliprane, on ignore
+                    if (nameLower.includes('tylenol')) currentThreshold = 4;
+                    else if (nameLower.includes('doliprane') || nameLower.includes('motrin')) currentThreshold = 6;
                     if (currentThreshold === 0) continue;
-
                     const medDate = new Date(entry.date);
                     if (medDate <= now && (!latestMed || medDate > new Date(latestMed.date))) {
                         latestMed = entry;
@@ -897,17 +855,11 @@
                     }
                 }
             }
-
-            if (!latestMed) {
-                medicationAlert.style.display = 'none';
-                return;
-            }
-
+            if (!latestMed) { medicationAlert.style.display = 'none'; return; }
             const elapsedMs = now - new Date(latestMed.date);
             const elapsedHours = Math.floor(elapsedMs / 3600000);
             const elapsedMinutes = Math.floor((elapsedMs % 3600000) / 60000);
             const thresholdMs = thresholdHours * 3600000;
-
             if (elapsedMs < thresholdMs) {
                 const remainingMs = thresholdMs - elapsedMs;
                 const remainingHours = Math.floor(remainingMs / 3600000);
@@ -924,15 +876,10 @@
             }
         }
 
-        // Filtrage
         function getFilteredEntries() {
             let filtered = entries;
-            if (filterDate) {
-                filtered = filtered.filter(e => e.date && e.date.startsWith(filterDate));
-            }
-            if (filterType) {
-                filtered = filtered.filter(e => e.type === filterType);
-            }
+            if (filterDate) filtered = filtered.filter(e => e.date && e.date.startsWith(filterDate));
+            if (filterType) filtered = filtered.filter(e => e.type === filterType);
             return filtered;
         }
 
@@ -940,112 +887,48 @@
             const t = translations[currentLang];
             const filtered = getFilteredEntries();
             entryListDiv.innerHTML = '';
-            if (filtered.length === 0) {
-                entryListDiv.innerHTML = `<p>${t.noEntries}</p>`;
-                return;
-            }
+            if (filtered.length === 0) { entryListDiv.innerHTML = `<p>${t.noEntries}</p>`; return; }
             const sorted = [...filtered].sort((a, b) => (b.date || '').localeCompare(a.date || ''));
             sorted.forEach(entry => {
                 const card = document.createElement('div');
                 card.className = 'entry-card';
-
-                let badgeHtml = '';
-                let details = '';
+                let badgeHtml = '', details = '';
                 switch (entry.type) {
-                    case 'biberon':
-                        badgeHtml = `<span class="badge badge-biberon">${t.badgeBiberon}</span>`;
-                        details = t.detailsBiberon(entry.quantite, entry.description);
-                        break;
-                    case 'repas':
-                        badgeHtml = `<span class="badge badge-repas">${t.badgeRepas}</span>`;
-                        details = t.detailsRepas(entry.description, entry.quantite);
-                        break;
-                    case 'pipi':
-                        badgeHtml = `<span class="badge badge-pipi">${t.badgePipi}</span>`;
-                        details = t.detailsPipi;
-                        break;
-                    case 'caca':
-                        badgeHtml = `<span class="badge badge-caca">${t.badgeCaca}</span>`;
-                        details = t.detailsCaca(entry.consistance);
-                        break;
-                    case 'sommeil':
-                        badgeHtml = `<span class="badge badge-sommeil">${t.badgeSommeil}</span>`;
-                        details = t.detailsSommeil(entry.sleepStart, entry.sleepEnd);
-                        break;
-                    case 'rdv':
-                        badgeHtml = `<span class="badge badge-rdv">${t.badgeRdv}</span>`;
-                        details = t.detailsRdv(entry.rdvDate, entry.rdvDesc);
-                        break;
-                    case 'temp':
-                        badgeHtml = `<span class="badge badge-temp">${t.badgeTemp}</span>`;
-                        details = t.detailsTemp(entry.temp, currentLang);
-                        break;
-                    case 'mesures':
-                        badgeHtml = `<span class="badge badge-mesures">${t.badgeMesures}</span>`;
-                        details = t.detailsMesures(entry.poids, entry.taille, currentLang);
-                        break;
-                    case 'bain':
-                        badgeHtml = `<span class="badge badge-bain">${t.badgeBain}</span>`;
-                        details = t.detailsBain;
-                        break;
-                    case 'medicament':
-                        badgeHtml = `<span class="badge badge-medicament">${t.badgeMedicament}</span>`;
-                        details = t.detailsMedicament(entry.nom, entry.dose);
-                        break;
-                    case 'autre':
-                        badgeHtml = `<span class="badge badge-autre">${t.badgeAutre}</span>`;
-                        details = t.detailsAutre;
-                        break;
+                    case 'biberon': badgeHtml = `<span class="badge badge-biberon">${t.badgeBiberon}</span>`; details = t.detailsBiberon(entry.quantite, entry.description); break;
+                    case 'repas': badgeHtml = `<span class="badge badge-repas">${t.badgeRepas}</span>`; details = t.detailsRepas(entry.description, entry.quantite); break;
+                    case 'pipi': badgeHtml = `<span class="badge badge-pipi">${t.badgePipi}</span>`; details = t.detailsPipi; break;
+                    case 'caca': badgeHtml = `<span class="badge badge-caca">${t.badgeCaca}</span>`; details = t.detailsCaca(entry.consistance); break;
+                    case 'sommeil': badgeHtml = `<span class="badge badge-sommeil">${t.badgeSommeil}</span>`; details = t.detailsSommeil(entry.sleepStart, entry.sleepEnd); break;
+                    case 'rdv': badgeHtml = `<span class="badge badge-rdv">${t.badgeRdv}</span>`; details = t.detailsRdv(entry.rdvDate, entry.rdvDesc); break;
+                    case 'temp': badgeHtml = `<span class="badge badge-temp">${t.badgeTemp}</span>`; details = t.detailsTemp(entry.temp, currentLang); break;
+                    case 'mesures': badgeHtml = `<span class="badge badge-mesures">${t.badgeMesures}</span>`; details = t.detailsMesures(entry.poids, entry.taille, currentLang); break;
+                    case 'bain': badgeHtml = `<span class="badge badge-bain">${t.badgeBain}</span>`; details = t.detailsBain; break;
+                    case 'medicament': badgeHtml = `<span class="badge badge-medicament">${t.badgeMedicament}</span>`; details = t.detailsMedicament(entry.nom, entry.dose); break;
+                    case 'autre': badgeHtml = `<span class="badge badge-autre">${t.badgeAutre}</span>`; details = t.detailsAutre; break;
                 }
-
                 const dateFormatted = new Date(entry.date).toLocaleString(currentLang === 'fr' ? 'fr-FR' : 'en-US', {
                     day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
                 });
-
-                card.innerHTML = `
-                    <div class="actions">
-                        <button class="edit-btn" title="${t.editTitle}">✏️</button>
-                        <button class="delete-btn" title="${t.deleteTitle}">🗑️</button>
-                    </div>
-                    <div style="margin-bottom:0.3rem;">${badgeHtml} <small>${dateFormatted}</small></div>
-                    <div>${details}</div>
-                    ${entry.notes ? '<div style="font-style:italic; margin-top:0.3rem;">' + entry.notes + '</div>' : ''}
-                `;
+                card.innerHTML = `<div class="actions"><button class="edit-btn" title="${t.editTitle}">\u270f\ufe0f</button><button class="delete-btn" title="${t.deleteTitle}">\ud83d\uddd1\ufe0f</button></div><div style="margin-bottom:0.3rem;">${badgeHtml} <small>${dateFormatted}</small></div><div>${details}</div>${entry.notes ? '<div style="font-style:italic; margin-top:0.3rem;">' + entry.notes + '</div>' : ''}`;
                 card.querySelector('.edit-btn').addEventListener('click', () => editEntry(entry));
                 card.querySelector('.delete-btn').addEventListener('click', () => deleteEntry(entry.id));
                 entryListDiv.appendChild(card);
             });
         }
 
-        // Filtres
-        applyFilterBtn.addEventListener('click', () => {
-            filterDate = filterDateInput.value;
-            filterType = filterTypeSelect.value;
-            renderEntries();
-        });
-        clearFilterBtn.addEventListener('click', () => {
-            filterDateInput.value = '';
-            filterTypeSelect.value = '';
-            filterDate = '';
-            filterType = '';
-            renderEntries();
-        });
+        applyFilterBtn.addEventListener('click', () => { filterDate = filterDateInput.value; filterType = filterTypeSelect.value; renderEntries(); });
+        clearFilterBtn.addEventListener('click', () => { filterDateInput.value = ''; filterTypeSelect.value = ''; filterDate = ''; filterType = ''; renderEntries(); });
 
-        // Export JSON
         exportBtn.addEventListener('click', () => {
             const dataStr = JSON.stringify(entries, null, 2);
             const blob = new Blob([dataStr], {type: 'application/json'});
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
-            a.href = url;
-            a.download = 'noah-data.json';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
+            a.href = url; a.download = 'noah-data.json';
+            document.body.appendChild(a); a.click();
+            document.body.removeChild(a); URL.revokeObjectURL(url);
         });
 
-        // RDV alert
         function updateAppointmentAlert() {
             const t = translations[currentLang];
             const now = new Date();
@@ -1063,9 +946,7 @@
             }
             if (closest) {
                 appointmentAlert.style.display = 'block';
-                appointmentAlert.textContent = t.appointmentSoon
-                    .replace('{days}', closest.days)
-                    .replace('{desc}', closest.desc);
+                appointmentAlert.textContent = t.appointmentSoon.replace('{days}', closest.days).replace('{desc}', closest.desc);
             } else {
                 appointmentAlert.style.display = 'none';
             }
@@ -1081,11 +962,7 @@
                     throw new Error(t.errorServer + ' (' + response.status + ')');
                 }
                 const data = await response.json();
-                if (data && Array.isArray(data)) {
-                    entries = data;
-                } else {
-                    entries = [];
-                }
+                entries = (data && Array.isArray(data)) ? data : [];
                 localStorage.setItem('noahCache', JSON.stringify(entries));
                 statusDiv.textContent = t.statusCloud;
             } catch (e) {
@@ -1094,12 +971,8 @@
                 if (e instanceof TypeError) message = t.errorNetwork;
                 statusDiv.textContent = message;
                 const cached = localStorage.getItem('noahCache');
-                if (cached) {
-                    entries = JSON.parse(cached);
-                    statusDiv.textContent += '\n' + t.statusOffline;
-                } else {
-                    entries = [];
-                }
+                entries = cached ? JSON.parse(cached) : [];
+                if (cached) statusDiv.textContent += '\n' + t.statusOffline;
             }
             renderEntries();
             updateAppointmentAlert();
@@ -1134,8 +1007,7 @@
         }
 
         async function deleteEntry(id) {
-            const t = translations[currentLang];
-            if (!confirm(t.deleteConfirm)) return;
+            if (!confirm(translations[currentLang].deleteConfirm)) return;
             entries = entries.filter(e => e.id !== id);
             await saveData();
             renderEntries();
@@ -1147,16 +1019,10 @@
             const type = eventTypeSelect.value;
             const date = eventDateInput.value;
             if (!type || !date) return;
-
-            const newEntry = {
-                id: editingId || generateId(),
-                type: type,
-                date: date,
-                notes: notesInput.value.trim()
-            };
-
+            const newEntry = { id: editingId || generateId(), type, date, notes: notesInput.value.trim() };
             if (type === 'biberon') {
-                newEntry.quantite = biberonQuantite.value.trim();
+                let qty = biberonQuantite.value.trim();
+                newEntry.quantite = qty !== '' ? (currentLang === 'en' ? flOzToMl(qty) : qty) : '';
                 newEntry.description = biberonType.value.trim();
             } else if (type === 'repas') {
                 newEntry.description = repasDescription.value.trim();
@@ -1171,36 +1037,21 @@
                 newEntry.rdvDate = rdvDate.value;
             } else if (type === 'temp') {
                 let tempVal = tempValue.value.trim();
-                if (tempVal !== '') {
-                    newEntry.temp = currentLang === 'en' ? fToC(tempVal) : tempVal;
-                } else {
-                    newEntry.temp = '';
-                }
+                newEntry.temp = tempVal !== '' ? (currentLang === 'en' ? fToC(tempVal) : tempVal) : '';
             } else if (type === 'mesures') {
-                let poidsVal = poidsValue.value.trim();
-                if (poidsVal !== '') {
-                    newEntry.poids = currentLang === 'en' ? lbToKg(poidsVal) : poidsVal;
-                } else {
-                    newEntry.poids = '';
-                }
-                let tailleVal = tailleValue.value.trim();
-                if (tailleVal !== '') {
-                    newEntry.taille = currentLang === 'en' ? inToCm(tailleVal) : tailleVal;
-                } else {
-                    newEntry.taille = '';
-                }
+                let p = poidsValue.value.trim(), t = tailleValue.value.trim();
+                newEntry.poids = p !== '' ? (currentLang === 'en' ? lbToKg(p) : p) : '';
+                newEntry.taille = t !== '' ? (currentLang === 'en' ? inToCm(t) : t) : '';
             } else if (type === 'medicament') {
                 newEntry.nom = medicamentNom.value.trim();
                 newEntry.dose = medicamentDose.value.trim();
             }
-
             if (editingId) {
                 const index = entries.findIndex(e => e.id === editingId);
                 if (index !== -1) entries[index] = newEntry;
             } else {
                 entries.push(newEntry);
             }
-
             await saveData();
             resetForm();
             renderEntries();
@@ -1208,7 +1059,6 @@
 
         cancelButton.addEventListener('click', resetForm);
 
-        // Lancer une vérification périodique du médicament toutes les 30 secondes
         function startMedicationTimer() {
             if (medicationTimerInterval) clearInterval(medicationTimerInterval);
             medicationTimerInterval = setInterval(updateMedicationAlert, 30000);
