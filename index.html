@@ -310,7 +310,7 @@
         const translations = {
             fr: {
                 subtitle: 'Suivi quotidien de Noah',
-                dailySummary: 'Aujourd’hui : {summary}',
+                dailySummary: 'Aujourd'hui : {summary}',
                 none: 'aucun événement',
                 statusLoading: 'Chargement en cours...',
                 statusCloud: '✅ Données chargées depuis le cloud',
@@ -363,7 +363,7 @@
                 tailleLabel: 'Taille (cm)',
                 taillePlaceholder: 'Ex: 72',
                 medNomLabel: 'Nom du médicament *',
-                medNomPlaceholder: 'Ex : Doliprane, Advil...',
+                medNomPlaceholder: 'Ex : Doliprane, Motrin, Tylenol...',
                 medDoseLabel: 'Dose / quantité',
                 medDosePlaceholder: 'Ex : 2.5 ml, un suppo...',
                 notesLabel: 'Notes (commentaire libre)',
@@ -397,8 +397,13 @@
                 detailsCaca: (consistance) => consistance ? `Caca (${consistance})` : 'Caca',
                 detailsSommeil: (start, end) => {
                     if (start && end) {
-                        const duree = Math.round((new Date(end) - new Date(start)) / 3600000 * 10) / 10;
-                        return `Endormi à ${new Date(start).toLocaleTimeString('fr', {hour:'2-digit', minute:'2-digit'})}, réveil à ${new Date(end).toLocaleTimeString('fr', {hour:'2-digit', minute:'2-digit'})} (${duree}h)`;
+                        const startDate = new Date(start);
+                        const endDate = new Date(end);
+                        if (start.length <= 16 && end.length <= 16) {
+                            endDate.setFullYear(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
+                        }
+                        const duree = Math.round((endDate - startDate) / 3600000 * 10) / 10;
+                        return `Endormi à ${startDate.toLocaleTimeString('fr', {hour:'2-digit', minute:'2-digit'})}, réveil à ${endDate.toLocaleTimeString('fr', {hour:'2-digit', minute:'2-digit'})} (${duree}h)`;
                     } else if (start) {
                         return `Endormi à ${new Date(start).toLocaleTimeString('fr', {hour:'2-digit', minute:'2-digit'})} (en cours)`;
                     } else {
@@ -458,8 +463,8 @@
                 medicament: '💊 Medication',
                 autre: '📝 Other',
                 dateLabel: 'Date and time *',
-                bibQtyLabel: 'Quantity (ml) *',
-                bibQtyPlaceholder: 'E.g. 180',
+                bibQtyLabel: 'Quantity (fl oz) *',
+                bibQtyPlaceholder: 'E.g. 6.1',
                 bibTypeLabel: 'Milk type / note',
                 bibTypePlaceholder: 'E.g. formula, breast milk...',
                 repasDescLabel: 'Food(s) *',
@@ -483,7 +488,7 @@
                 tailleLabel: 'Height (in)',
                 taillePlaceholder: 'E.g. 28.3',
                 medNomLabel: 'Medication name *',
-                medNomPlaceholder: 'E.g. Tylenol, Advil...',
+                medNomPlaceholder: 'E.g. Tylenol, Motrin, Advil...',
                 medDoseLabel: 'Dose / amount',
                 medDosePlaceholder: 'E.g. 2.5 ml, one suppository...',
                 notesLabel: 'Notes (free comment)',
@@ -511,14 +516,23 @@
                 badgeBain: '🛁 Bath',
                 badgeMedicament: '💊 Medication',
                 badgeAutre: '📝 Other',
-                detailsBiberon: (qty, desc) => `<strong>${qty || '?'} ml</strong>${desc ? ' – ' + desc : ''}`,
+                detailsBiberon: (qty, desc) => {
+                    const ml = parseFloat(qty);
+                    const display = ml ? (ml / 29.5735).toFixed(1) + ' fl oz' : (qty || '?');
+                    return `<strong>${display}</strong>${desc ? ' – ' + desc : ''}`;
+                },
                 detailsRepas: (desc, qty) => `<strong>${desc || 'Meal'}</strong>${qty ? ' – ' + qty : ''}`,
                 detailsPipi: 'Pee',
                 detailsCaca: (consistance) => consistance ? `Poop (${consistance})` : 'Poop',
                 detailsSommeil: (start, end) => {
                     if (start && end) {
-                        const duree = Math.round((new Date(end) - new Date(start)) / 3600000 * 10) / 10;
-                        return `Fell asleep at ${new Date(start).toLocaleTimeString('en', {hour:'2-digit', minute:'2-digit'})}, woke up at ${new Date(end).toLocaleTimeString('en', {hour:'2-digit', minute:'2-digit'})} (${duree}h)`;
+                        const startDate = new Date(start);
+                        const endDate = new Date(end);
+                        if (start.length <= 16 && end.length <= 16) {
+                            endDate.setFullYear(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
+                        }
+                        const duree = Math.round((endDate - startDate) / 3600000 * 10) / 10;
+                        return `Fell asleep at ${startDate.toLocaleTimeString('en', {hour:'2-digit', minute:'2-digit'})}, woke up at ${endDate.toLocaleTimeString('en', {hour:'2-digit', minute:'2-digit'})} (${duree}h)`;
                     } else if (start) {
                         return `Fell asleep at ${new Date(start).toLocaleTimeString('en', {hour:'2-digit', minute:'2-digit'})} (in progress)`;
                     } else {
@@ -643,6 +657,12 @@
         function inToCm(inches) {
             return (parseFloat(inches) * 2.54).toFixed(1);
         }
+        function mlToFlOz(ml) {
+            return (parseFloat(ml) / 29.5735).toFixed(1);
+        }
+        function flOzToMl(flOz) {
+            return (parseFloat(flOz) * 29.5735).toFixed(0);
+        }
 
         function applyLanguage(lang) {
             const t = translations[lang];
@@ -712,24 +732,30 @@
             if (editingId) {
                 const entry = entries.find(e => e.id === editingId);
                 if (entry) {
+                    if (entry.type === 'biberon' && entry.quantite) {
+                        biberonQuantite.value = lang === 'en' ? mlToFlOz(entry.quantite) : entry.quantite;
+                    } else {
+                        biberonQuantite.value = entry?.quantite || '';
+                    }
                     if (entry.type === 'temp' && entry.temp) {
                         tempValue.value = lang === 'en' ? cToF(entry.temp) : entry.temp;
-                    } else tempValue.value = entry.temp || '';
+                    } else tempValue.value = entry?.temp || '';
                     if (entry.type === 'mesures') {
                         poidsValue.value = (entry.poids && lang === 'en') ? kgToLb(entry.poids) : (entry.poids || '');
                         tailleValue.value = (entry.taille && lang === 'en') ? cmToIn(entry.taille) : (entry.taille || '');
                     } else {
-                        poidsValue.value = entry.poids || '';
-                        tailleValue.value = entry.taille || '';
+                        poidsValue.value = entry?.poids || '';
+                        tailleValue.value = entry?.taille || '';
                     }
                 }
             } else {
+                biberonQuantite.value = '';
                 tempValue.value = '';
                 poidsValue.value = '';
                 tailleValue.value = '';
             }
 
-            resetForm(); // resetForm met editingId à null, on le restaure
+            resetForm();
             if (editingId) {
                 editingId = entries.find(e => e.id === editingId)?.id || null;
                 if (editingId) {
@@ -816,7 +842,7 @@
             eventTypeSelect.value = entry.type;
             eventDateInput.value = entry.date || '';
             notesInput.value = entry.notes || '';
-            biberonQuantite.value = entry.quantite || '';
+            biberonQuantite.value = (entry.type === 'biberon' && currentLang === 'en') ? mlToFlOz(entry.quantite) : (entry.quantite || '');
             biberonType.value = entry.description || '';
             repasDescription.value = entry.description || '';
             repasQuantite.value = entry.quantite || '';
@@ -827,7 +853,6 @@
             rdvDate.value = entry.rdvDate || '';
             medicamentNom.value = entry.nom || '';
             medicamentDose.value = entry.dose || '';
-            // Température et mesures avec conversion
             if (entry.type === 'temp' && entry.temp) {
                 tempValue.value = currentLang === 'en' ? cToF(entry.temp) : entry.temp;
             } else tempValue.value = entry.temp || '';
@@ -870,24 +895,22 @@
             dailySummaryEl.textContent = t.dailySummary.replace('{summary}', parts.join(', '));
         }
 
-             // Alerte médicament (Doliprane 6h, Tylenol 4h)
+        // Alerte médicament (Doliprane 6h, Motrin 6h, Tylenol 4h)
         function updateMedicationAlert() {
             const t = translations[currentLang];
             const now = new Date();
             let latestMed = null;
-            let thresholdHours = 0; // sera défini selon le médicament
+            let thresholdHours = 0;
 
             for (const entry of entries) {
                 if (entry.type === 'medicament' && entry.nom) {
                     const nameLower = entry.nom.toLowerCase();
-                    // Déterminer le seuil selon le médicament
                     let currentThreshold = 0;
                     if (nameLower.includes('tylenol')) {
-                        currentThreshold = 4; // 4 heures pour Tylenol
-                    } else if (nameLower.includes('doliprane')) {
-                        currentThreshold = 6; // 6 heures pour Doliprane
+                        currentThreshold = 4;
+                    } else if (nameLower.includes('doliprane') || nameLower.includes('motrin')) {
+                        currentThreshold = 6;
                     }
-                    // Si ce n'est ni Tylenol ni Doliprane, on ignore
                     if (currentThreshold === 0) continue;
 
                     const medDate = new Date(entry.date);
@@ -1156,7 +1179,12 @@
             };
 
             if (type === 'biberon') {
-                newEntry.quantite = biberonQuantite.value.trim();
+                let qty = biberonQuantite.value.trim();
+                if (qty !== '') {
+                    newEntry.quantite = currentLang === 'en' ? flOzToMl(qty) : qty;
+                } else {
+                    newEntry.quantite = '';
+                }
                 newEntry.description = biberonType.value.trim();
             } else if (type === 'repas') {
                 newEntry.description = repasDescription.value.trim();
