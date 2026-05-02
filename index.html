@@ -161,6 +161,7 @@
         .badge-medicament { background: #e67e22; }
         .badge-temp { background: #e74c3c; }
         .badge-mesures { background: #16a085; }
+        .badge-eau { background: #00bcd4; }
         .badge-autre { background: #95a5a6; }
         hr { margin: 0.8rem 0; border-color: var(--border); }
 
@@ -225,6 +226,14 @@
             <input type="text" id="biberonQuantite" placeholder="180" inputmode="numeric">
             <label for="biberonType" id="lblBibType"></label>
             <input type="text" id="biberonType" placeholder="">
+        </div>
+
+        <!-- EAU -->
+        <div id="fieldsEau" class="extra-fields">
+            <label for="eauQuantite" id="lblEauQty"></label>
+            <input type="text" id="eauQuantite" placeholder="100" inputmode="numeric">
+            <label for="eauCommentaire" id="lblEauCommentaire"></label>
+            <input type="text" id="eauCommentaire" placeholder="">
         </div>
 
         <!-- Repas solide -->
@@ -327,6 +336,7 @@
                 eventTypeLabel: "Type d'\u00e9v\u00e9nement *",
                 choose: '-- Choisis --',
                 biberon: '\ud83c\udf7c Biberon',
+                eau: '\ud83d\udca7 Eau',
                 repas: '\ud83c\udf7d\ufe0f Repas solide',
                 pipi: '\ud83d\udca7 Pipi',
                 caca: '\ud83d\udca9 Caca',
@@ -342,6 +352,10 @@
                 bibQtyPlaceholder: 'Ex : 180',
                 bibTypeLabel: 'Type de lait / remarque',
                 bibTypePlaceholder: 'Ex : lait infantile, lait maternel...',
+                eauQtyLabel: 'Quantit\u00e9 (ml) *',
+                eauQtyPlaceholder: 'Ex : 120',
+                eauCommentaireLabel: 'Commentaire (facultatif)',
+                eauCommentairePlaceholder: 'Ex : eau du robinet, eau minérale...',
                 repasDescLabel: 'Aliment(s) *',
                 repasDescPlaceholder: 'Ex : pur\u00e9e de carottes, compote...',
                 repasQtyLabel: 'Quantit\u00e9',
@@ -381,6 +395,7 @@
                 deleteConfirm: 'Supprimer cet \u00e9v\u00e9nement ?',
                 exportBtn: '\ud83d\udce5 Exporter les donn\u00e9es',
                 badgeBiberon: '\ud83c\udf7c Biberon',
+                badgeEau: '\ud83d\udca7 Eau',
                 badgeRepas: '\ud83c\udf7d\ufe0f Repas solide',
                 badgePipi: '\ud83d\udca7 Pipi',
                 badgeCaca: '\ud83d\udca9 Caca',
@@ -392,6 +407,7 @@
                 badgeMedicament: '\ud83d\udc8a M\u00e9dicament',
                 badgeAutre: '\ud83d\udcdd Autre',
                 detailsBiberon: (qty, desc) => `<strong>${qty || '?'} ml</strong>${desc ? ' \u2013 ' + desc : ''}`,
+                detailsEau: (qty, comment) => `<strong>${qty || '?'} ml</strong>${comment ? ' \u2013 ' + comment : ''}`,
                 detailsRepas: (desc, qty) => `<strong>${desc || 'Repas'}</strong>${qty ? ' \u2013 ' + qty : ''}`,
                 detailsPipi: 'Pipi',
                 detailsCaca: (consistance) => consistance ? `Caca (${consistance})` : 'Caca',
@@ -452,6 +468,7 @@
                 eventTypeLabel: 'Event type *',
                 choose: '-- Choose --',
                 biberon: '\ud83c\udf7c Bottle',
+                eau: '\ud83d\udca7 Water',
                 repas: '\ud83c\udf7d\ufe0f Solid meal',
                 pipi: '\ud83d\udca7 Pee',
                 caca: '\ud83d\udca9 Poop',
@@ -467,6 +484,10 @@
                 bibQtyPlaceholder: 'E.g. 6.1',
                 bibTypeLabel: 'Milk type / note',
                 bibTypePlaceholder: 'E.g. formula, breast milk...',
+                eauQtyLabel: 'Quantity (fl oz) *',
+                eauQtyPlaceholder: 'E.g. 4',
+                eauCommentaireLabel: 'Comment (optional)',
+                eauCommentairePlaceholder: 'E.g. tap water, mineral water...',
                 repasDescLabel: 'Food(s) *',
                 repasDescPlaceholder: 'E.g. carrot puree, apple sauce...',
                 repasQtyLabel: 'Quantity',
@@ -506,6 +527,7 @@
                 deleteConfirm: 'Delete this event?',
                 exportBtn: '\ud83d\udce5 Export data',
                 badgeBiberon: '\ud83c\udf7c Bottle',
+                badgeEau: '\ud83d\udca7 Water',
                 badgeRepas: '\ud83c\udf7d\ufe0f Solid meal',
                 badgePipi: '\ud83d\udca7 Pee',
                 badgeCaca: '\ud83d\udca9 Poop',
@@ -520,6 +542,11 @@
                     const ml = parseFloat(qty);
                     const display = ml ? (ml / 29.5735).toFixed(1) + ' fl oz' : (qty || '?');
                     return `<strong>${display}</strong>${desc ? ' \u2013 ' + desc : ''}`;
+                },
+                detailsEau: (qty, comment) => {
+                    const ml = parseFloat(qty);
+                    const display = ml ? (ml / 29.5735).toFixed(1) + ' fl oz' : (qty || '?');
+                    return `<strong>${display}</strong>${comment ? ' \u2013 ' + comment : ''}`;
                 },
                 detailsRepas: (desc, qty) => `<strong>${desc || 'Meal'}</strong>${qty ? ' \u2013 ' + qty : ''}`,
                 detailsPipi: 'Pee',
@@ -606,6 +633,7 @@
         const clearFilterBtn = document.getElementById('clearFilter');
 
         const fieldsBiberon = document.getElementById('fieldsBiberon');
+        const fieldsEau = document.getElementById('fieldsEau');
         const fieldsRepas = document.getElementById('fieldsRepas');
         const fieldsCaca = document.getElementById('fieldsCaca');
         const fieldsSommeil = document.getElementById('fieldsSommeil');
@@ -615,6 +643,8 @@
         const fieldsMedicament = document.getElementById('fieldsMedicament');
         const biberonQuantite = document.getElementById('biberonQuantite');
         const biberonType = document.getElementById('biberonType');
+        const eauQuantite = document.getElementById('eauQuantite');
+        const eauCommentaire = document.getElementById('eauCommentaire');
         const repasDescription = document.getElementById('repasDescription');
         const repasQuantite = document.getElementById('repasQuantite');
         const cacaConsistance = document.getElementById('cacaConsistance');
@@ -650,13 +680,17 @@
             langToggle.textContent = lang === 'fr' ? 'EN' : 'FR';
             document.getElementById('lblEventType').textContent = t.eventTypeLabel;
             eventTypeSelect.innerHTML = `<option value="">${t.choose}</option>` +
-                ['biberon','repas','pipi','caca','sommeil','rdv','temp','mesures','bain','medicament','autre']
+                ['biberon','eau','repas','pipi','caca','sommeil','rdv','temp','mesures','bain','medicament','autre']
                     .map(type => `<option value="${type}">${t[type]}</option>`).join('');
             document.getElementById('lblEventDate').textContent = t.dateLabel;
             document.getElementById('lblBibQty').textContent = t.bibQtyLabel;
             biberonQuantite.placeholder = t.bibQtyPlaceholder;
             document.getElementById('lblBibType').textContent = t.bibTypeLabel;
             biberonType.placeholder = t.bibTypePlaceholder;
+            document.getElementById('lblEauQty').textContent = t.eauQtyLabel;
+            eauQuantite.placeholder = t.eauQtyPlaceholder;
+            document.getElementById('lblEauCommentaire').textContent = t.eauCommentaireLabel;
+            eauCommentaire.placeholder = t.eauCommentairePlaceholder;
             document.getElementById('lblRepasDesc').textContent = t.repasDescLabel;
             repasDescription.placeholder = t.repasDescPlaceholder;
             document.getElementById('lblRepasQty').textContent = t.repasQtyLabel;
@@ -689,7 +723,7 @@
             document.getElementById('lblFilterDate').textContent = t.filterDate;
             document.getElementById('lblFilterType').textContent = t.filterType;
             filterTypeSelect.innerHTML = `<option value="">${t.filterAll}</option>` +
-                ['biberon','repas','pipi','caca','sommeil','rdv','temp','mesures','bain','medicament','autre']
+                ['biberon','eau','repas','pipi','caca','sommeil','rdv','temp','mesures','bain','medicament','autre']
                     .map(type => `<option value="${type}">${t[type]}</option>`).join('');
 
             if (editingId) {
@@ -697,6 +731,8 @@
                 if (entry) {
                     if (entry.type === 'biberon' && entry.quantite) {
                         biberonQuantite.value = lang === 'en' ? mlToFlOz(entry.quantite) : entry.quantite;
+                    } else if (entry.type === 'eau' && entry.quantite) {
+                        eauQuantite.value = lang === 'en' ? mlToFlOz(entry.quantite) : entry.quantite;
                     } else {
                         biberonQuantite.value = entry?.quantite || '';
                     }
@@ -713,6 +749,7 @@
                 }
             } else {
                 biberonQuantite.value = '';
+                eauQuantite.value = '';
                 tempValue.value = '';
                 poidsValue.value = '';
                 tailleValue.value = '';
@@ -741,12 +778,14 @@
 
         function updateExtraFields() {
             const type = eventTypeSelect.value;
-            [fieldsBiberon, fieldsRepas, fieldsCaca, fieldsSommeil, fieldsRdv, fieldsTemp, fieldsMesures, fieldsMedicament]
+            [fieldsBiberon, fieldsEau, fieldsRepas, fieldsCaca, fieldsSommeil, fieldsRdv, fieldsTemp, fieldsMesures, fieldsMedicament]
                 .forEach(el => el.classList.remove('active'));
             biberonQuantite.required = false;
+            eauQuantite.required = false;
             repasDescription.required = false;
             medicamentNom.required = false;
             if (type === 'biberon') { fieldsBiberon.classList.add('active'); biberonQuantite.required = true; }
+            else if (type === 'eau') { fieldsEau.classList.add('active'); eauQuantite.required = true; }
             else if (type === 'repas') { fieldsRepas.classList.add('active'); repasDescription.required = true; }
             else if (type === 'caca') { fieldsCaca.classList.add('active'); }
             else if (type === 'sommeil') { fieldsSommeil.classList.add('active'); }
@@ -764,6 +803,8 @@
             notesInput.value = '';
             biberonQuantite.value = '';
             biberonType.value = '';
+            eauQuantite.value = '';
+            eauCommentaire.value = '';
             repasDescription.value = '';
             repasQuantite.value = '';
             cacaConsistance.value = '';
@@ -787,8 +828,16 @@
             eventTypeSelect.value = entry.type;
             eventDateInput.value = entry.date || '';
             notesInput.value = entry.notes || '';
-            biberonQuantite.value = (entry.type === 'biberon' && currentLang === 'en') ? mlToFlOz(entry.quantite) : (entry.quantite || '');
-            biberonType.value = entry.description || '';
+            if (entry.type === 'biberon') {
+                biberonQuantite.value = (currentLang === 'en') ? mlToFlOz(entry.quantite) : (entry.quantite || '');
+                biberonType.value = entry.description || '';
+            } else if (entry.type === 'eau') {
+                eauQuantite.value = (currentLang === 'en') ? mlToFlOz(entry.quantite) : (entry.quantite || '');
+                eauCommentaire.value = entry.commentaire || '';
+            } else {
+                biberonQuantite.value = entry?.quantite || '';
+                biberonType.value = entry?.description || '';
+            }
             repasDescription.value = entry.description || '';
             repasQuantite.value = entry.quantite || '';
             cacaConsistance.value = entry.consistance || '';
@@ -828,12 +877,23 @@
                 return;
             }
             const counts = {};
-            todayEntries.forEach(e => { counts[e.type] = (counts[e.type] || 0) + 1; });
+            let totalEauMl = 0;
+            todayEntries.forEach(e => {
+                counts[e.type] = (counts[e.type] || 0) + 1;
+                if ((e.type === 'biberon' || e.type === 'eau') && e.quantite) {
+                    totalEauMl += parseFloat(e.quantite) || 0;
+                }
+            });
             const parts = Object.entries(counts).map(([type, count]) => {
                 const badgeKey = 'badge' + type.charAt(0).toUpperCase() + type.slice(1);
                 return `${count} ${t[badgeKey] || type}`;
             });
-            dailySummaryEl.textContent = t.dailySummary.replace('{summary}', parts.join(', '));
+            let summaryText = parts.join(', ');
+            if (totalEauMl > 0) {
+                const displayTotal = currentLang === 'en' ? mlToFlOz(totalEauMl) + ' fl oz' : totalEauMl + ' ml';
+                summaryText += ` (total liquide: ${displayTotal})`;
+            }
+            dailySummaryEl.textContent = t.dailySummary.replace('{summary}', summaryText);
         }
 
         function updateMedicationAlert() {
@@ -895,6 +955,7 @@
                 let badgeHtml = '', details = '';
                 switch (entry.type) {
                     case 'biberon': badgeHtml = `<span class="badge badge-biberon">${t.badgeBiberon}</span>`; details = t.detailsBiberon(entry.quantite, entry.description); break;
+                    case 'eau': badgeHtml = `<span class="badge badge-eau">${t.badgeEau}</span>`; details = t.detailsEau(entry.quantite, entry.commentaire); break;
                     case 'repas': badgeHtml = `<span class="badge badge-repas">${t.badgeRepas}</span>`; details = t.detailsRepas(entry.description, entry.quantite); break;
                     case 'pipi': badgeHtml = `<span class="badge badge-pipi">${t.badgePipi}</span>`; details = t.detailsPipi; break;
                     case 'caca': badgeHtml = `<span class="badge badge-caca">${t.badgeCaca}</span>`; details = t.detailsCaca(entry.consistance); break;
@@ -1024,6 +1085,10 @@
                 let qty = biberonQuantite.value.trim();
                 newEntry.quantite = qty !== '' ? (currentLang === 'en' ? flOzToMl(qty) : qty) : '';
                 newEntry.description = biberonType.value.trim();
+            } else if (type === 'eau') {
+                let qty = eauQuantite.value.trim();
+                newEntry.quantite = qty !== '' ? (currentLang === 'en' ? flOzToMl(qty) : qty) : '';
+                newEntry.commentaire = eauCommentaire.value.trim();
             } else if (type === 'repas') {
                 newEntry.description = repasDescription.value.trim();
                 newEntry.quantite = repasQuantite.value.trim();
