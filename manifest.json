@@ -1,6 +1,6 @@
 {
-  "name": "Noah Tracker",
-  "short_name": "Noah",
+  "name": "Noah & Aïla Tracker",
+  "short_name": "Tracker",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#f0f8ff",
@@ -12,7 +12,7 @@
       "type": "image/png"
     },
     {
-      "src": "noah-tracker-icon-small.png",
+      "src": "noah-tracker-icon-big.png",
       "sizes": "512x512",
       "type": "image/png"
     }
