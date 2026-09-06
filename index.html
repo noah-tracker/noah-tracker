@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Noah Tracker</title>
+    <title>Noah & Aïla Tracker</title>
     <link rel="manifest" href="manifest.json">
     <style>
         :root {
@@ -42,6 +42,16 @@
         }
         h1 { color: var(--primary); margin: 0; font-size: 1.5rem; }
         .header-buttons { display: flex; gap: 0.5rem; }
+        .header-buttons select {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
         .lang-toggle, .theme-toggle {
             background: var(--primary);
             color: white;
@@ -199,8 +209,12 @@
 </head>
 <body>
     <div class="header">
-        <h1>🧒 Noah Tracker</h1>
+        <h1>🧒 <span id="profileTitle">Noah</span> Tracker</h1>
         <div class="header-buttons">
+            <select id="profileSelect">
+                <option value="noah">Noah</option>
+                <option value="aila">Aïla</option>
+            </select>
             <button class="theme-toggle" id="themeToggle">☀️</button>
             <button class="lang-toggle" id="langToggle">EN</button>
         </div>
@@ -311,54 +325,54 @@
 
     <script>
         // ================= CONFIGURATION =================
-        const FIREBASE_URL = 'https://noah-tracker-c27f4-default-rtdb.europe-west1.firebasedatabase.app/entries.json';
+        const FIREBASE_BASE_URL = 'https://noah-tracker-c27f4-default-rtdb.europe-west1.firebasedatabase.app/entries';
         const FIREBASE_SECRET = '4X64T2m3GOO08BwgvnBgHesQ0gXCEcv34HQ5ufwX';
         // =================================================
         const AUTH_PARAM = `auth=${FIREBASE_SECRET}`;
 
         const translations = {
             fr: {
-                subtitle: 'Suivi quotidien de Noah',
-                dailySummary: 'Aujourd\u2019hui : {summary}',
-                none: 'aucun \u00e9v\u00e9nement',
+                subtitle: 'Suivi quotidien',
+                dailySummary: 'Aujourd’hui : {summary}',
+                none: 'aucun événement',
                 statusLoading: 'Chargement en cours...',
-                statusCloud: '\u2705 Donn\u00e9es charg\u00e9es depuis le cloud',
-                statusOffline: '\u26a0\ufe0f Mode hors ligne (donn\u00e9es locales)',
-                statusEmpty: '\u26a0\ufe0f Aucune donn\u00e9e, d\u00e9marrage \u00e0 vide',
-                statusSavedCloud: '\u2705 Synchronis\u00e9 avec le cloud',
-                statusSavedLocal: '\u26a0\ufe0f Donn\u00e9es enregistr\u00e9es localement (connexion indisponible)',
-                errorNetwork: '\u274c Erreur r\u00e9seau : impossible de joindre le serveur.',
-                errorAuth: '\u274c Acc\u00e8s refus\u00e9 (authentification). V\u00e9rifie le secret Firebase.',
-                errorServer: '\u274c Erreur serveur Firebase.',
-                errorFormat: '\u274c Les donn\u00e9es ne sont pas un tableau valide.',
-                appointmentSoon: '\u26a0\ufe0f Prochain RDV dans {days} jour(s) : {desc}',
-                medicationRecent: '\u26a0\ufe0f {name} pris il y a {h}h{min}. Attendre encore {remaining}h{remainingMin} avant la prochaine dose.',
-                eventTypeLabel: "Type d'\u00e9v\u00e9nement *",
+                statusCloud: '✅ Données chargées depuis le cloud',
+                statusOffline: '⚠️ Mode hors ligne (données locales)',
+                statusEmpty: '⚠️ Aucune donnée, démarrage à vide',
+                statusSavedCloud: '✅ Synchronisé avec le cloud',
+                statusSavedLocal: '⚠️ Données enregistrées localement (connexion indisponible)',
+                errorNetwork: '❌ Erreur réseau : impossible de joindre le serveur.',
+                errorAuth: '❌ Accès refusé (authentification). Vérifie le secret Firebase.',
+                errorServer: '❌ Erreur serveur Firebase.',
+                errorFormat: '❌ Les données ne sont pas un tableau valide.',
+                appointmentSoon: '⚠️ Prochain RDV dans {days} jour(s) : {desc}',
+                medicationRecent: '⚠️ {name} pris il y a {h}h{min}. Attendre encore {remaining}h{remainingMin} avant la prochaine dose.',
+                eventTypeLabel: "Type d'événement *",
                 choose: '-- Choisis --',
-                biberon: '\ud83c\udf7c Biberon',
-                eau: '\ud83d\udca7 Eau',
-                repas: '\ud83c\udf7d\ufe0f Repas solide',
-                pipi: '\ud83d\udca7 Pipi',
-                caca: '\ud83d\udca9 Caca',
-                sommeil: '\ud83d\ude34 Sommeil',
-                rdv: '\ud83d\udcc5 Rendez-vous',
-                temp: '\ud83c\udf21\ufe0f Temp\u00e9rature',
-                mesures: '\ud83d\udccf Mesures (poids/taille)',
-                bain: '\ud83d\udec1 Bain',
-                medicament: '\ud83d\udc8a M\u00e9dicament',
-                autre: '\ud83d\udcdd Autre',
+                biberon: '🍼 Biberon',
+                eau: '💧 Eau',
+                repas: '🍽️ Repas solide',
+                pipi: '💧 Pipi',
+                caca: '💩 Caca',
+                sommeil: '😴 Sommeil',
+                rdv: '📅 Rendez-vous',
+                temp: '🌡️ Température',
+                mesures: '📏 Mesures (poids/taille)',
+                bain: '🛁 Bain',
+                medicament: '💊 Médicament',
+                autre: '📝 Autre',
                 dateLabel: 'Date et heure *',
-                bibQtyLabel: 'Quantit\u00e9 (ml) *',
+                bibQtyLabel: 'Quantité (ml) *',
                 bibQtyPlaceholder: 'Ex : 180',
                 bibTypeLabel: 'Type de lait / remarque',
                 bibTypePlaceholder: 'Ex : lait infantile, lait maternel...',
-                eauQtyLabel: 'Quantit\u00e9 (ml) *',
+                eauQtyLabel: 'Quantité (ml) *',
                 eauQtyPlaceholder: 'Ex : 120',
                 eauCommentaireLabel: 'Commentaire (facultatif)',
                 eauCommentairePlaceholder: 'Ex : eau du robinet, eau minérale...',
                 repasDescLabel: 'Aliment(s) *',
-                repasDescPlaceholder: 'Ex : pur\u00e9e de carottes, compote...',
-                repasQtyLabel: 'Quantit\u00e9',
+                repasDescPlaceholder: 'Ex : purée de carottes, compote...',
+                repasQtyLabel: 'Quantité',
                 repasQtyPlaceholder: 'Ex : 100g, un petit pot...',
                 consistanceCacaLabel: 'Consistance (optionnelle)',
                 consistanceChoose: '-- Indique si besoin --',
@@ -367,48 +381,48 @@
                 solides: 'Solides',
                 dures: 'Dures',
                 sleepStartLabel: 'Heure d\'endormissement',
-                sleepEndLabel: 'Heure de r\u00e9veil',
-                rdvDescLabel: 'Description (ex: P\u00e9diatre)',
+                sleepEndLabel: 'Heure de réveil',
+                rdvDescLabel: 'Description (ex: Pédiatre)',
                 rdvDateLabel: 'Date du rendez-vous *',
-                tempLabel: 'Temp\u00e9rature (\u00b0C)',
+                tempLabel: 'Température (°C)',
                 tempPlaceholder: 'Ex: 37.5',
                 poidsLabel: 'Poids (kg)',
                 poidsPlaceholder: 'Ex: 8.5',
                 tailleLabel: 'Taille (cm)',
                 taillePlaceholder: 'Ex: 72',
-                medNomLabel: 'Nom du m\u00e9dicament *',
+                medNomLabel: 'Nom du médicament *',
                 medNomPlaceholder: 'Ex : Doliprane, Motrin, Tylenol...',
-                medDoseLabel: 'Dose / quantit\u00e9',
+                medDoseLabel: 'Dose / quantité',
                 medDosePlaceholder: 'Ex : 2.5 ml, un suppo...',
                 notesLabel: 'Notes (commentaire libre)',
                 notesPlaceholder: 'Tout ce que tu veux ajouter...',
-                saveBtn: '\ud83d\udcbe Enregistrer',
-                updateBtn: '\u2705 Mettre \u00e0 jour',
+                saveBtn: '💾 Enregistrer',
+                updateBtn: '✅ Mettre à jour',
                 cancelBtn: 'Annuler la modification',
                 filterDate: 'Date:',
                 filterType: 'Type:',
                 filterAll: 'Tous',
-                historyTitle: '\ud83d\udccb Historique',
-                noEntries: 'Aucun \u00e9v\u00e9nement pour le moment.',
+                historyTitle: '📋 Historique',
+                noEntries: 'Aucun événement pour le moment.',
                 editTitle: 'Modifier',
                 deleteTitle: 'Supprimer',
-                deleteConfirm: 'Supprimer cet \u00e9v\u00e9nement ?',
-                exportBtn: '\ud83d\udce5 Exporter les donn\u00e9es',
-                badgeBiberon: '\ud83c\udf7c Biberon',
-                badgeEau: '\ud83d\udca7 Eau',
-                badgeRepas: '\ud83c\udf7d\ufe0f Repas solide',
-                badgePipi: '\ud83d\udca7 Pipi',
-                badgeCaca: '\ud83d\udca9 Caca',
-                badgeSommeil: '\ud83d\ude34 Sommeil',
-                badgeRdv: '\ud83d\udcc5 Rendez-vous',
-                badgeTemp: '\ud83c\udf21\ufe0f Temp\u00e9rature',
-                badgeMesures: '\ud83d\udccf Mesures',
-                badgeBain: '\ud83d\udec1 Bain',
-                badgeMedicament: '\ud83d\udc8a M\u00e9dicament',
-                badgeAutre: '\ud83d\udcdd Autre',
-                detailsBiberon: (qty, desc) => `<strong>${qty || '?'} ml</strong>${desc ? ' \u2013 ' + desc : ''}`,
-                detailsEau: (qty, comment) => `<strong>${qty || '?'} ml</strong>${comment ? ' \u2013 ' + comment : ''}`,
-                detailsRepas: (desc, qty) => `<strong>${desc || 'Repas'}</strong>${qty ? ' \u2013 ' + qty : ''}`,
+                deleteConfirm: 'Supprimer cet événement ?',
+                exportBtn: '📥 Exporter les données',
+                badgeBiberon: '🍼 Biberon',
+                badgeEau: '💧 Eau',
+                badgeRepas: '🍽️ Repas solide',
+                badgePipi: '💧 Pipi',
+                badgeCaca: '💩 Caca',
+                badgeSommeil: '😴 Sommeil',
+                badgeRdv: '📅 Rendez-vous',
+                badgeTemp: '🌡️ Température',
+                badgeMesures: '📏 Mesures',
+                badgeBain: '🛁 Bain',
+                badgeMedicament: '💊 Médicament',
+                badgeAutre: '📝 Autre',
+                detailsBiberon: (qty, desc) => `<strong>${qty || '?'} ml</strong>${desc ? ' – ' + desc : ''}`,
+                detailsEau: (qty, comment) => `<strong>${qty || '?'} ml</strong>${comment ? ' – ' + comment : ''}`,
+                detailsRepas: (desc, qty) => `<strong>${desc || 'Repas'}</strong>${qty ? ' – ' + qty : ''}`,
                 detailsPipi: 'Pipi',
                 detailsCaca: (consistance) => consistance ? `Caca (${consistance})` : 'Caca',
                 detailsSommeil: (start, end) => {
@@ -419,19 +433,19 @@
                             endDate.setFullYear(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
                         }
                         const duree = Math.round((endDate - startDate) / 3600000 * 10) / 10;
-                        return `Endormi \u00e0 ${startDate.toLocaleTimeString('fr', {hour:'2-digit', minute:'2-digit'})}, r\u00e9veil \u00e0 ${endDate.toLocaleTimeString('fr', {hour:'2-digit', minute:'2-digit'})} (${duree}h)`;
+                        return `Endormi à ${startDate.toLocaleTimeString('fr', {hour:'2-digit', minute:'2-digit'})}, réveil à ${endDate.toLocaleTimeString('fr', {hour:'2-digit', minute:'2-digit'})} (${duree}h)`;
                     } else if (start) {
-                        return `Endormi \u00e0 ${new Date(start).toLocaleTimeString('fr', {hour:'2-digit', minute:'2-digit'})} (en cours)`;
+                        return `Endormi à ${new Date(start).toLocaleTimeString('fr', {hour:'2-digit', minute:'2-digit'})} (en cours)`;
                     } else {
-                        return 'D\u00e9tails du sommeil incomplets';
+                        return 'Détails du sommeil incomplets';
                     }
                 },
                 detailsRdv: (date, desc) => `${desc || 'Rendez-vous'} le ${new Date(date).toLocaleString('fr', {day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'})}`,
                 detailsTemp: (val, lang) => {
                     if (!val && val !== '0') return '';
                     const c = parseFloat(val);
-                    if (lang === 'en') return ((c * 9/5 + 32).toFixed(1)) + ' \u00b0F';
-                    return c + ' \u00b0C';
+                    if (lang === 'en') return ((c * 9/5 + 32).toFixed(1)) + ' °F';
+                    return c + ' °C';
                 },
                 detailsMesures: (poids, taille, lang) => {
                     const parts = [];
@@ -446,39 +460,39 @@
                     return parts.join(' / ') || 'Mesures';
                 },
                 detailsBain: 'Bain',
-                detailsMedicament: (nom, dose) => `<strong>${nom || 'M\u00e9dicament'}</strong>${dose ? ' \u2013 ' + dose : ''}`,
-                detailsAutre: '\u00c9v\u00e9nement divers'
+                detailsMedicament: (nom, dose) => `<strong>${nom || 'Médicament'}</strong>${dose ? ' – ' + dose : ''}`,
+                detailsAutre: 'Événement divers'
             },
             en: {
-                subtitle: "Noah's daily tracking",
+                subtitle: "Daily tracking",
                 dailySummary: 'Today: {summary}',
                 none: 'no events',
                 statusLoading: 'Loading...',
-                statusCloud: '\u2705 Data loaded from cloud',
-                statusOffline: '\u26a0\ufe0f Offline mode (local data)',
-                statusEmpty: '\u26a0\ufe0f No data, starting empty',
-                statusSavedCloud: '\u2705 Synced with cloud',
-                statusSavedLocal: '\u26a0\ufe0f Data saved locally (no connection)',
-                errorNetwork: '\u274c Network error: Cannot reach server.',
-                errorAuth: '\u274c Access denied (auth). Check Firebase secret.',
-                errorServer: '\u274c Firebase server error.',
-                errorFormat: '\u274c Data is not a valid array.',
-                appointmentSoon: '\u26a0\ufe0f Upcoming appointment in {days} day(s): {desc}',
-                medicationRecent: '\u26a0\ufe0f {name} taken {h}h{min} ago. Wait {remaining}h{remainingMin} before next dose.',
+                statusCloud: '✅ Data loaded from cloud',
+                statusOffline: '⚠️ Offline mode (local data)',
+                statusEmpty: '⚠️ No data, starting empty',
+                statusSavedCloud: '✅ Synced with cloud',
+                statusSavedLocal: '⚠️ Data saved locally (no connection)',
+                errorNetwork: '❌ Network error: Cannot reach server.',
+                errorAuth: '❌ Access denied (auth). Check Firebase secret.',
+                errorServer: '❌ Firebase server error.',
+                errorFormat: '❌ Data is not a valid array.',
+                appointmentSoon: '⚠️ Upcoming appointment in {days} day(s): {desc}',
+                medicationRecent: '⚠️ {name} taken {h}h{min} ago. Wait {remaining}h{remainingMin} before next dose.',
                 eventTypeLabel: 'Event type *',
                 choose: '-- Choose --',
-                biberon: '\ud83c\udf7c Bottle',
-                eau: '\ud83d\udca7 Water',
-                repas: '\ud83c\udf7d\ufe0f Solid meal',
-                pipi: '\ud83d\udca7 Pee',
-                caca: '\ud83d\udca9 Poop',
-                sommeil: '\ud83d\ude34 Sleep',
-                rdv: '\ud83d\udcc5 Appointment',
-                temp: '\ud83c\udf21\ufe0f Temperature',
-                mesures: '\ud83d\udccf Measurements (weight/height)',
-                bain: '\ud83d\udec1 Bath',
-                medicament: '\ud83d\udc8a Medication',
-                autre: '\ud83d\udcdd Other',
+                biberon: '🍼 Bottle',
+                eau: '💧 Water',
+                repas: '🍽️ Solid meal',
+                pipi: '💧 Pee',
+                caca: '💩 Poop',
+                sommeil: '😴 Sleep',
+                rdv: '📅 Appointment',
+                temp: '🌡️ Temperature',
+                mesures: '📏 Measurements (weight/height)',
+                bain: '🛁 Bath',
+                medicament: '💊 Medication',
+                autre: '📝 Other',
                 dateLabel: 'Date and time *',
                 bibQtyLabel: 'Quantity (fl oz) *',
                 bibQtyPlaceholder: 'E.g. 6.1',
@@ -502,7 +516,7 @@
                 sleepEndLabel: 'Woke up at',
                 rdvDescLabel: 'Description (e.g. Pediatrician)',
                 rdvDateLabel: 'Appointment date *',
-                tempLabel: 'Temperature (\u00b0F)',
+                tempLabel: 'Temperature (°F)',
                 tempPlaceholder: 'E.g. 98.6',
                 poidsLabel: 'Weight (lb)',
                 poidsPlaceholder: 'E.g. 18.7',
@@ -514,41 +528,41 @@
                 medDosePlaceholder: 'E.g. 2.5 ml, one suppository...',
                 notesLabel: 'Notes (free comment)',
                 notesPlaceholder: 'Anything you want to add...',
-                saveBtn: '\ud83d\udcbe Save',
-                updateBtn: '\u2705 Update',
+                saveBtn: '💾 Save',
+                updateBtn: '✅ Update',
                 cancelBtn: 'Cancel editing',
                 filterDate: 'Date:',
                 filterType: 'Type:',
                 filterAll: 'All',
-                historyTitle: '\ud83d\udccb History',
+                historyTitle: '📋 History',
                 noEntries: 'No events yet.',
                 editTitle: 'Edit',
                 deleteTitle: 'Delete',
                 deleteConfirm: 'Delete this event?',
-                exportBtn: '\ud83d\udce5 Export data',
-                badgeBiberon: '\ud83c\udf7c Bottle',
-                badgeEau: '\ud83d\udca7 Water',
-                badgeRepas: '\ud83c\udf7d\ufe0f Solid meal',
-                badgePipi: '\ud83d\udca7 Pee',
-                badgeCaca: '\ud83d\udca9 Poop',
-                badgeSommeil: '\ud83d\ude34 Sleep',
-                badgeRdv: '\ud83d\udcc5 Appointment',
-                badgeTemp: '\ud83c\udf21\ufe0f Temperature',
-                badgeMesures: '\ud83d\udccf Measurements',
-                badgeBain: '\ud83d\udec1 Bath',
-                badgeMedicament: '\ud83d\udc8a Medication',
-                badgeAutre: '\ud83d\udcdd Other',
+                exportBtn: '📥 Export data',
+                badgeBiberon: '🍼 Bottle',
+                badgeEau: '💧 Water',
+                badgeRepas: '🍽️ Solid meal',
+                badgePipi: '💧 Pee',
+                badgeCaca: '💩 Poop',
+                badgeSommeil: '😴 Sleep',
+                badgeRdv: '📅 Appointment',
+                badgeTemp: '🌡️ Temperature',
+                badgeMesures: '📏 Measurements',
+                badgeBain: '🛁 Bath',
+                badgeMedicament: '💊 Medication',
+                badgeAutre: '📝 Other',
                 detailsBiberon: (qty, desc) => {
                     const ml = parseFloat(qty);
                     const display = ml ? (ml / 29.5735).toFixed(1) + ' fl oz' : (qty || '?');
-                    return `<strong>${display}</strong>${desc ? ' \u2013 ' + desc : ''}`;
+                    return `<strong>${display}</strong>${desc ? ' – ' + desc : ''}`;
                 },
                 detailsEau: (qty, comment) => {
                     const ml = parseFloat(qty);
                     const display = ml ? (ml / 29.5735).toFixed(1) + ' fl oz' : (qty || '?');
-                    return `<strong>${display}</strong>${comment ? ' \u2013 ' + comment : ''}`;
+                    return `<strong>${display}</strong>${comment ? ' – ' + comment : ''}`;
                 },
-                detailsRepas: (desc, qty) => `<strong>${desc || 'Meal'}</strong>${qty ? ' \u2013 ' + qty : ''}`,
+                detailsRepas: (desc, qty) => `<strong>${desc || 'Meal'}</strong>${qty ? ' – ' + qty : ''}`,
                 detailsPipi: 'Pee',
                 detailsCaca: (consistance) => consistance ? `Poop (${consistance})` : 'Poop',
                 detailsSommeil: (start, end) => {
@@ -570,8 +584,8 @@
                 detailsTemp: (val, lang) => {
                     if (!val && val !== '0') return '';
                     const c = parseFloat(val);
-                    if (lang === 'en') return ((c * 9/5 + 32).toFixed(1)) + ' \u00b0F';
-                    return c + ' \u00b0C';
+                    if (lang === 'en') return ((c * 9/5 + 32).toFixed(1)) + ' °F';
+                    return c + ' °C';
                 },
                 detailsMesures: (poids, taille, lang) => {
                     const parts = [];
@@ -586,13 +600,14 @@
                     return parts.join(' / ') || 'Measurements';
                 },
                 detailsBain: 'Bath',
-                detailsMedicament: (nom, dose) => `<strong>${nom || 'Medication'}</strong>${dose ? ' \u2013 ' + dose : ''}`,
+                detailsMedicament: (nom, dose) => `<strong>${nom || 'Medication'}</strong>${dose ? ' – ' + dose : ''}`,
                 detailsAutre: 'Other event'
             }
         };
 
         let currentLang = localStorage.getItem('noahLang') || 'fr';
         let currentTheme = localStorage.getItem('noahTheme') || 'dark';
+        let currentProfile = localStorage.getItem('noahTrackerProfile') || 'noah';
         let entries = [];
         let editingId = null;
         let filterDate = '';
@@ -602,16 +617,17 @@
         function applyTheme(theme) {
             if (theme === 'light') {
                 document.body.classList.add('light-mode');
-                document.getElementById('themeToggle').textContent = '\ud83c\udf19';
+                document.getElementById('themeToggle').textContent = '🌙';
             } else {
                 document.body.classList.remove('light-mode');
-                document.getElementById('themeToggle').textContent = '\u2600\ufe0f';
+                document.getElementById('themeToggle').textContent = '☀️';
             }
         }
         applyTheme(currentTheme);
 
         const themeToggle = document.getElementById('themeToggle');
         const langToggle = document.getElementById('langToggle');
+        const profileSelect = document.getElementById('profileSelect');
         const subtitleEl = document.getElementById('subtitle');
         const dailySummaryEl = document.getElementById('dailySummary');
         const statusDiv = document.getElementById('status');
@@ -664,6 +680,14 @@
             applyTheme(currentTheme);
         });
 
+        profileSelect.addEventListener('change', () => {
+            currentProfile = profileSelect.value;
+            localStorage.setItem('noahTrackerProfile', currentProfile);
+            resetForm(); // Annule toute modification en cours pour éviter les bugs
+            applyLanguage(currentLang); 
+            loadData(); 
+        });
+
         function cToF(celsius) { return (parseFloat(celsius) * 9/5 + 32).toFixed(1); }
         function fToC(fahrenheit) { return ((parseFloat(fahrenheit) - 32) * 5/9).toFixed(1); }
         function kgToLb(kg) { return (parseFloat(kg) * 2.20462).toFixed(1); }
@@ -676,7 +700,17 @@
         function applyLanguage(lang) {
             const t = translations[lang];
             document.documentElement.lang = lang;
-            subtitleEl.textContent = t.subtitle;
+            
+            const profileNames = { noah: 'Noah', aila: 'Aïla' };
+            const profileName = profileNames[currentProfile];
+            document.getElementById('profileTitle').textContent = profileName;
+            document.getElementById('profileSelect').value = currentProfile;
+            document.title = (lang === 'fr' ? 'Suivi de ' : 'Tracking ') + profileName;
+
+            subtitleEl.textContent = lang === 'fr' 
+                ? (currentProfile === 'noah' ? 'Suivi quotidien de Noah' : 'Suivi quotidien d’Aïla')
+                : `${profileName}'s daily tracking`;
+                
             langToggle.textContent = lang === 'fr' ? 'EN' : 'FR';
             document.getElementById('lblEventType').textContent = t.eventTypeLabel;
             eventTypeSelect.innerHTML = `<option value="">${t.choose}</option>` +
@@ -970,7 +1004,7 @@
                 const dateFormatted = new Date(entry.date).toLocaleString(currentLang === 'fr' ? 'fr-FR' : 'en-US', {
                     day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
                 });
-                card.innerHTML = `<div class="actions"><button class="edit-btn" title="${t.editTitle}">\u270f\ufe0f</button><button class="delete-btn" title="${t.deleteTitle}">\ud83d\uddd1\ufe0f</button></div><div style="margin-bottom:0.3rem;">${badgeHtml} <small>${dateFormatted}</small></div><div>${details}</div>${entry.notes ? '<div style="font-style:italic; margin-top:0.3rem;">' + entry.notes + '</div>' : ''}`;
+                card.innerHTML = `<div class="actions"><button class="edit-btn" title="${t.editTitle}">✏️</button><button class="delete-btn" title="${t.deleteTitle}">🗑️</button></div><div style="margin-bottom:0.3rem;">${badgeHtml} <small>${dateFormatted}</small></div><div>${details}</div>${entry.notes ? '<div style="font-style:italic; margin-top:0.3rem;">' + entry.notes + '</div>' : ''}`;
                 card.querySelector('.edit-btn').addEventListener('click', () => editEntry(entry));
                 card.querySelector('.delete-btn').addEventListener('click', () => deleteEntry(entry.id));
                 entryListDiv.appendChild(card);
@@ -985,7 +1019,7 @@
             const blob = new Blob([dataStr], {type: 'application/json'});
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
-            a.href = url; a.download = 'noah-data.json';
+            a.href = url; a.download = `tracker-data-${currentProfile}.json`;
             document.body.appendChild(a); a.click();
             document.body.removeChild(a); URL.revokeObjectURL(url);
         });
@@ -1016,22 +1050,27 @@
         async function loadData() {
             const t = translations[currentLang];
             statusDiv.textContent = t.statusLoading;
+            const profileUrl = `${FIREBASE_BASE_URL}/${currentProfile}.json?${AUTH_PARAM}`;
             try {
-                const response = await fetch(`${FIREBASE_URL}?${AUTH_PARAM}`);
+                const response = await fetch(profileUrl);
                 if (!response.ok) {
                     if (response.status === 401 || response.status === 403) throw new Error(t.errorAuth);
                     throw new Error(t.errorServer + ' (' + response.status + ')');
                 }
-                const data = await response.json();
-                entries = (data && Array.isArray(data)) ? data : [];
-                localStorage.setItem('noahCache', JSON.stringify(entries));
+                let data = await response.json();
+                // Correctif Firebase REST API : renvoie parfois un objet au lieu d'un tableau
+                if (data && !Array.isArray(data) && typeof data === 'object') {
+                    data = Object.values(data);
+                }
+                entries = Array.isArray(data) ? data : [];
+                localStorage.setItem(`noahCache_${currentProfile}`, JSON.stringify(entries));
                 statusDiv.textContent = t.statusCloud;
             } catch (e) {
                 console.warn('Firebase load error', e);
                 let message = e.message;
                 if (e instanceof TypeError) message = t.errorNetwork;
                 statusDiv.textContent = message;
-                const cached = localStorage.getItem('noahCache');
+                const cached = localStorage.getItem(`noahCache_${currentProfile}`);
                 entries = cached ? JSON.parse(cached) : [];
                 if (cached) statusDiv.textContent += '\n' + t.statusOffline;
             }
@@ -1043,9 +1082,10 @@
 
         async function saveData() {
             const t = translations[currentLang];
-            localStorage.setItem('noahCache', JSON.stringify(entries));
+            localStorage.setItem(`noahCache_${currentProfile}`, JSON.stringify(entries));
+            const profileUrl = `${FIREBASE_BASE_URL}/${currentProfile}.json?${AUTH_PARAM}`;
             try {
-                const response = await fetch(`${FIREBASE_URL}?${AUTH_PARAM}`, {
+                const response = await fetch(profileUrl, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(entries)
